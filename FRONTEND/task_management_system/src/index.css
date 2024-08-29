@@ -1,0 +1,22 @@
+*{
+  font-family: 'Roboto' , sans-serif;
+}
+.input-class {
+  color: #2f2f38;
+}
+
+.reg-button {
+  background: linear-gradient(0deg, #f6f7ff 23.96%, #fff 60.42%);
+  border-radius: 16px;
+  color: #2f2f38 !important;
+  font-weight: 600;
+}
+
+.reg-button:hover{
+  background: #d9e9ff;
+}
+
+.header-container {
+  position: relative;
+  top: -10px;
+}
