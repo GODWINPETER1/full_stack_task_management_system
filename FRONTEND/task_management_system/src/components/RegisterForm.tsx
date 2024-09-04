@@ -1,27 +1,41 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Grid, Card, FormControlLabel, Checkbox } from '@mui/material';
+import { TextField, Button, Container, Typography, Grid, Card, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext'; // Adjust the path as needed
 
 const RegisterForm: React.FC = () => {
+  const { login } = useAuth(); // Use useAuth here
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:8000/api/v1/register', { email, password });
-      // Handle successful registration
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/register', { username, email, password });
+      // Assuming response.data contains username and email
+      console.log(response.data.email)
+      login(response.data.username, response.data.email);
+      setSuccessDialogOpen(true);  // Show success dialog
     } catch (error) {
-      // Handle error
+      setErrorDialogOpen(true);  // Show error dialog
     }
+  };
+
+  const handleCloseDialog = () => {
+    setSuccessDialogOpen(false);
+    setErrorDialogOpen(false);
   };
 
   return (
     <Container sx={{
       display: 'flex',
-      marginTop: "40px",
+      marginTop: "-40px",
       alignItems: 'center',
       justifyContent: 'center',
       height: '75vh'
@@ -41,7 +55,17 @@ const RegisterForm: React.FC = () => {
             </Typography>
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               <TextField
-                id="standard-basic"
+                id="username"
+                variant='standard'
+                label="Username"
+                required
+                fullWidth
+                margin="normal"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <TextField
+                id="email"
                 variant='standard'
                 label="Email"
                 required
@@ -51,12 +75,13 @@ const RegisterForm: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
               <TextField
-                id="standard-basic"
+                id="password"
                 variant='standard'
                 label="Password"
                 required
                 fullWidth
                 margin="normal"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -64,13 +89,13 @@ const RegisterForm: React.FC = () => {
                 control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
                 label="Remember me"
               />
-              <Button type="submit" style={{backgroundColor: '#9ACD32' , color: '#000'}} fullWidth>
+              <Button type="submit" style={{ backgroundColor: '#9ACD32', color: '#000' }} fullWidth>
                 Register
               </Button>
             </form>
 
             <Typography variant='body2' sx={{ marginTop: 2 }}>
-              Already have an account? <a href="/signin">Sign in</a>
+              Already have an account? <a href="/signin">Sign in </a>
             </Typography>
 
           </Grid>
@@ -83,7 +108,6 @@ const RegisterForm: React.FC = () => {
             backgroundPosition: 'center',
             minHeight: 250
           }}>
-            {/* Animation or Image Placeholder */}
             <img 
               src={`${process.env.PUBLIC_URL}/images/task.jpg`} 
               alt="Registration Animation" 
@@ -92,6 +116,46 @@ const RegisterForm: React.FC = () => {
           </Grid>
         </Grid>
       </Card>
+
+      {/* Success Dialog */}
+      <Dialog
+        open={successDialogOpen}
+        onClose={handleCloseDialog}
+        aria-labelledby="success-dialog-title"
+      >
+        <DialogTitle id="success-dialog-title" sx={{ display: 'flex', alignItems: 'center', color: '#4CAF50' }}>
+          <CheckCircleOutlineIcon sx={{ marginRight: 1 }} />
+          Registration Successful
+        </DialogTitle>
+        <DialogContent>
+          <Typography>Your account has been created successfully.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} sx={{ color: '#4CAF50' }}>
+            <a href='/signin'> ok </a>
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog
+        open={errorDialogOpen}
+        onClose={handleCloseDialog}
+        aria-labelledby="error-dialog-title"
+      >
+        <DialogTitle id="error-dialog-title" sx={{ display: 'flex', alignItems: 'center', color: '#f44336' }}>
+          <ErrorOutlineIcon sx={{ marginRight: 1 }} />
+          Registration Failed
+        </DialogTitle>
+        <DialogContent>
+          <Typography>There was an error creating your account. Please try again.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} sx={{ color: '#f44336' }}>
+            Retry
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
