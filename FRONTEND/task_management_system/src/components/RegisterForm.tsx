@@ -2,25 +2,27 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Grid, Card, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext'; // Adjust the path as needed
 
 const RegisterForm: React.FC = () => {
-  const { login } = useAuth(); // Use useAuth here
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const { username, email, setUsername, setEmail, register } = useAuth();
+
   const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (password !== passwordConfirmation) {
+      setPasswordMismatch(true);
+      return;
+    }
+    setPasswordMismatch(false);
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/register', { username, email, password });
-      // Assuming response.data contains username and email
-      console.log(response.data.email)
-      login(response.data.username, response.data.email);
+      await register(username, email, password);
       setSuccessDialogOpen(true);  // Show success dialog
     } catch (error) {
       setErrorDialogOpen(true);  // Show error dialog
@@ -35,7 +37,7 @@ const RegisterForm: React.FC = () => {
   return (
     <Container sx={{
       display: 'flex',
-      marginTop: "-40px",
+      marginTop: "-100px",
       alignItems: 'center',
       justifyContent: 'center',
       height: '75vh'
@@ -85,6 +87,19 @@ const RegisterForm: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <TextField
+                id="passwordConfirmation"
+                variant='standard'
+                label="Confirm Password"
+                required
+                fullWidth
+                margin="normal"
+                type="password"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                error={passwordMismatch}
+                helperText={passwordMismatch ? "Passwords do not match" : ""}
+              />
               <FormControlLabel
                 control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
                 label="Remember me"
@@ -103,7 +118,7 @@ const RegisterForm: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundImage: 'url(/path-to-your-animation-or-photo)',
+            backgroundImage: 'url(/path-to-your-animation-or/photo)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             minHeight: 250
@@ -132,7 +147,7 @@ const RegisterForm: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} sx={{ color: '#4CAF50' }}>
-            <a href='/signin'> ok </a>
+            <a href='/signin'> OK </a>
           </Button>
         </DialogActions>
       </Dialog>

@@ -3,6 +3,11 @@
 
 body {
   font-family: 'Roboto', sans-serif;
+  overflow:  hidden !important;
+}
+
+a {
+  text-decoration: none;
 }
 
 .input-class {
@@ -45,8 +50,8 @@ body {
   height: 150px;
   background-color: rgba(154, 205, 50, 0.2);
   border-radius: 50%;
-  top: -50px;
-  right: -50px;
+  top: 10px;
+  right: -1px;
   animation: moveCircle 10s linear infinite;
 }
 
@@ -69,8 +74,8 @@ body {
   border-left: 100px solid transparent;
   border-right: 100px solid transparent;
   border-bottom: 200px solid rgba(154, 205, 50, 0.2);
-  bottom: -100px;
-  left: -50px;
+  bottom: 20px;
+  left: -1px;
   animation: moveTriangle 8s linear infinite;
 }
 
@@ -85,3 +90,4 @@ body {
     transform: translateY(0) translateX(0);
   }
 }
+

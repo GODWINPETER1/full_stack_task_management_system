@@ -8,22 +8,26 @@ import { useAuth } from '../context/AuthContext'; // Adjust the path as needed
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth(); // Use useAuth here
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { username: usernameOrEmail, email: usernameOrEmail, password });
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { username, email, password });
+
+      console.log(response);
       // Assuming response.data contains username and email
       login(response.data.username, response.data.email);
       setSuccessDialogOpen(true); // Show success dialog
       setTimeout(() => {
-        navigate('/dashboard')
-      })
+        navigate('/dashboard');
+      }, 2000); // Delay navigation to allow dialog display
     } catch (error) {
       setErrorDialogOpen(true);  // Show error dialog
     }
@@ -37,7 +41,7 @@ const LoginForm: React.FC = () => {
   return (
     <Container sx={{
       display: 'flex',
-      marginTop: "-40px",
+      marginTop: "-100px",
       alignItems: 'center',
       justifyContent: 'center',
       height: '75vh'
@@ -56,15 +60,25 @@ const LoginForm: React.FC = () => {
               Login
             </Typography>
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-              <TextField
-                id="username-or-email"
+              {/* <TextField
+                id="username"
                 variant='standard'
-                label="Username or Email"
+                label="Username"
                 required
                 fullWidth
                 margin="normal"
-                value={usernameOrEmail}
-                onChange={(e) => setUsernameOrEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              /> */}
+              <TextField
+                id="email"
+                variant='standard'
+                label="Email"
+                required
+                fullWidth
+                margin="normal"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <TextField
                 id="password"

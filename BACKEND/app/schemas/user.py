@@ -9,5 +9,6 @@ class UserCreate(BaseModel):
 
 # user login schema
 class UserLogin(BaseModel):
+    username: str
     email: EmailStr
     password: str
