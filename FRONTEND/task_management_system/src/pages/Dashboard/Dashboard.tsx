@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button, Typography, Container } from '@mui/material';
-import { useAuth } from '../context/AuthContext'; // Adjust the path as needed
+import { useAuth } from '../../context/AuthContext'; // Adjust the path as needed
 
 const UserProfile: React.FC = () => {
   const { username, email, logout } = useAuth();
