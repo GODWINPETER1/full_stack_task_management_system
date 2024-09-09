@@ -1,5 +1,6 @@
 from fastapi import FastAPI;
 from app.api.v1.endpoints import router as api_router
+from app.api.routes import router as project_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.oauth import router as oauth_router
 from starlette.middleware.sessions import SessionMiddleware
@@ -23,5 +24,6 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key="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")
 
 
+app.include_router(project_router , prefix = "/api/v1")
 app.include_router(api_router , prefix = "/api/v1")
 app.include_router(oauth_router, prefix="/api/v1")
