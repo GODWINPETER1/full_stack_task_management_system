@@ -24,6 +24,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key="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")
 
 
-app.include_router(project_router , prefix = "/api/v1")
+
 app.include_router(api_router , prefix = "/api/v1")
 app.include_router(oauth_router, prefix="/api/v1")
+app.include_router(project_router , prefix = "/api/v1/projects")

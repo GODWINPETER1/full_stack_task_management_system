@@ -61,11 +61,13 @@ async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login")
 async def login_user(user_in: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_in.email).first()
+    print(user)
     if not user or not verify_password(user_in.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     # Create a token payload
-    access_token = create_access_token(data={"sub": user.id})
+    data = {"sub" : str(user.id)}
+    access_token = create_access_token(data)
     return {
         "access_token": access_token,
         "token_type": "bearer",

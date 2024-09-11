@@ -17,20 +17,6 @@ class Task(TaskBase):
     project_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-# Project Schema
-class ProjectBase(BaseModel):
-    title: str
-    description: Optional[str] = None
 
-class ProjectCreate(ProjectBase):
-    pass
-
-class Project(ProjectBase):
-    id: int
-    owner_id: int
-    tasks: List[Task] = []
-
-    class Config:
-        orm_mode = True

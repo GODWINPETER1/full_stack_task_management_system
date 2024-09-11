@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
         Your Boards
       </h3>
       <Divider />
-      <List>
+      <List >
         <ListItemButton>
           <ListItemText primary="Project Board 1" sx={{ display: isCollapsed ? 'none' : 'block' }} />
         </ListItemButton>

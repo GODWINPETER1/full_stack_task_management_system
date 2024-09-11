@@ -1,46 +1,34 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.task import Project, Task
-from app.schemas.task import ProjectCreate, Project, TaskCreate, Task
-from app.db.session import get_db
-from app.api.dependencies import get_current_user
-from app.models.user import User
 from typing import List
+from app.crud import project as crud_project
+from app.schemas.project import Project, ProjectCreate
+from app.db.session import get_db
 
 router = APIRouter()
 
 # Create a project
-@router.post("/projects", response_model=Project)
-def create_project(project: ProjectCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    new_project = Project(**project.dict(), owner_id=current_user.id)
-    db.add(new_project)
-    db.commit()
-    db.refresh(new_project)
-    return new_project
+@router.post("/", response_model=Project)
+def create_project(project: ProjectCreate, db: Session = Depends(get_db)):
+    return crud_project.create_project(db=db, project=project)
 
-# Get all projects for the current user
-@router.get("/projects", response_model=List[Project])
-def get_projects(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Project).filter(Project.owner_id == current_user.id).all()
+# Get all projects
+@router.get("/", response_model=List[Project])
+def read_projects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return crud_project.get_projects(db=db, skip=skip, limit=limit)
 
-# Create a task within a project
-@router.post("/projects/{project_id}/tasks/", response_model=Task)
-def create_task_for_project(project_id: int, task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
-    if project is None:
+# Get a project by ID
+@router.get("/{project_id}", response_model=Project)
+def read_project(project_id: int, db: Session = Depends(get_db)):
+    db_project = crud_project.get_project_by_id(db, project_id=project_id)
+    if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
-    new_task = Task(**task.dict(), project_id=project_id)
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-    return new_task
+    return db_project
 
-# Get tasks for a specific project
-@router.get("/tasks/{project_id}/tasks", response_model=List[Task])
-def get_tasks_for_project(project_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
-    if project is None:
+# Delete a project by ID
+@router.delete("/{project_id}", response_model=Project)
+def delete_project(project_id: int, db: Session = Depends(get_db)):
+    db_project = crud_project.delete_project(db, project_id=project_id)
+    if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
-    return db.query(Task).filter(Task.project_id == project_id).all()
+    return db_project
