@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 
-interface ProjectCardProps {
+export interface ProjectCardProps {
   project: { id: string; title: string; description: string };
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;

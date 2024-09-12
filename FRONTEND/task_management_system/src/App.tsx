@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
+// src/App.tsx
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/Auth/RegisterPage';
 import LoginPage from './pages/Auth/LoginPage';
 import MainLayout from './components/layout/MainLayout';
-// Import LoginPage and other components/pages as needed
 import ProjectDetail from './pages/Projects/ProjectDetail';
-
-interface MainLayoutProps {
-  isCollapsed: boolean
-}
-
+import DashboardPage from './pages/Projects/DashboardPage'; // Updated import
+import MembersPage from './pages/Members/Members';
+import AgendaPage from './pages/Agenda/Agenda';
+import ReportsPage from './pages/Reports/Reports';
 
 const App: React.FC = () => {
-
-  
-
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<RegisterPage />} />
-        <Route path='/signin' element = {<LoginPage/>} />
-        <Route path='/dashboard' element = {<MainLayout isCollapsed children/>} />
+        <Route path="/signin" element={<LoginPage />} />
+        <Route path="/dashboard/*" element={<MainLayout />}>
+          <Route path="projects" element={<DashboardPage  />} />
+          <Route path="members" element={<MembersPage />} />
+          <Route path="agenda" element={<AgendaPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+        </Route>
         <Route path="/project/:id" element={<ProjectDetail />} />
-          <Route path="/project/new" element={<ProjectDetail />} />
-        
-        {/* Add routes for other pages here */}
+        <Route path="/project/new" element={<ProjectDetail />} />
       </Routes>
     </Router>
   );

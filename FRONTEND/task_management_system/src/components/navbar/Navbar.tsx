@@ -4,15 +4,17 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   onToggleSidebar: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
-  const { username, email } = useAuth();
+  const { username, email , logout } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [profilePic, setProfilePic] = useState<String | null>(null);
+  const navigate = useNavigate()
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -28,6 +30,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
       reader.onload = (e) => setProfilePic(e.target?.result as string);
       reader.readAsDataURL(event.target.files[0]);
     }
+  };
+
+  const handleLogout = () => {
+
+    logout()
+    navigate('/signin')
   };
 
   return (
@@ -111,7 +119,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
               </MenuItem>
 
               <MenuItem
-                onClick={handleClose}
+                onClick={handleLogout}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',

@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
 import axios from 'axios';
 // Define the type for the context
 interface AuthContextType {
@@ -39,13 +39,34 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setIsAuthenticated(true);
     setUsername(username);
     setEmail(email);
+
+    // save to the localstorage to avoid lost of data when refresh
+    localStorage.setItem('isAuthenticated' , 'true');
+    localStorage.setItem('username' , username)
+    localStorage.setItem('email' , email)
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUsername('');
     setEmail('');
+
+    // clear localStorage
+    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('username')
+    localStorage.removeItem('email')
   };
+
+  useEffect(() => {
+
+    const storedIsAuthenticated = localStorage.getItem('isAuthenticated');
+
+    if (storedIsAuthenticated) {
+      setIsAuthenticated(true)
+      setUsername(localStorage.getItem('username') || '');
+      setEmail(localStorage.getItem('email') || '')
+    }
+  } , [])
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername , setEmail , register ,login, logout }}>

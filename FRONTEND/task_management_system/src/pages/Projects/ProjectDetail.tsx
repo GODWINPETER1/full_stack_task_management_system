@@ -1,4 +1,3 @@
-// src/pages/ProjectDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -6,28 +5,39 @@ import { createProject as createProjectService, updateProject as updateProjectSe
 import { addProject, updateProject as updateProjectState } from '../../redux/projectSlice';
 import ProjectForm from '../../components/project/ProjectForm';
 
+const backgroundOptions = [
+  '#FFEBEE', '#E8F5E9', '#E3F2FD', '#FFF3E0', '#F3E5F5'
+];
+
 const ProjectDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [initialValues, setInitialValues] = useState<{ title: string; description: string }>({ title: '', description: '' });
+
+  // Add 'background' to the initialValues with a default value
+  const [initialValues, setInitialValues] = useState<{ title: string; description: string; background: string }>({
+    title: '',
+    description: '',
+    background: backgroundOptions[0], // Default background
+  });
 
   useEffect(() => {
     if (id) {
       // Fetch project details if editing
-      // For demonstration, initialValues are static. Implement API call if needed.
+      // For demonstration, static initialValues; fetch from API here if needed
+      // setInitialValues({ title: 'Project Title', description: 'Project Description', background: '#FFEBEE' });
     }
   }, [id]);
 
-  const handleSubmit = async (title: string, description: string) => {
+  const handleSubmit = async (title: string, description: string, background: string) => {
     try {
       if (id) {
         // Update existing project
         await updateProjectService(id, { title, description });
-        dispatch(updateProjectState({ id, title, description }));
+        dispatch(updateProjectState({ id, title, description , background}));
       } else {
         // Create new project
-        const newProject = await createProjectService({ title, description });
+        const newProject = await createProjectService({ title, description  });
         dispatch(addProject(newProject));
       }
       navigate('/');
@@ -35,6 +45,7 @@ const ProjectDetail: React.FC = () => {
       console.error('Failed to save project:', error);
     }
   };
+  
 
   return (
     <div style={{ padding: '20px' }}>
