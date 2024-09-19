@@ -9,6 +9,7 @@ import Navbar from '../navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 const MainLayout: React.FC = () => {
+  
   const dispatch = useDispatch();
   const projects = useSelector(selectProjects);
   const navigate = useNavigate();

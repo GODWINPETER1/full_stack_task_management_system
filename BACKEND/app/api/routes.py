@@ -5,6 +5,7 @@ from app.crud import project as crud_project
 from app.schemas.project import Project, ProjectCreate
 from app.db.session import get_db
 
+
 router = APIRouter()
 
 # Create a project
@@ -32,3 +33,20 @@ def delete_project(project_id: int, db: Session = Depends(get_db)):
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
     return db_project
+
+@router.put("/{project_id}/reopen", response_model=Project)
+def reopen_project(project_id: int, db: Session = Depends(get_db)):
+    project = db.query(Project).filter(Project.id == project_id, Project.deleted == True).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found or already active")
+    
+    project.deleted = False
+    db.commit()
+    db.refresh(project)
+    return project
+
+@router.get("/deleted", response_model=List[Project])
+def get_deleted_projects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Project).filter(Project.deleted == True).offset(skip).limit(limit).all()
+
+

@@ -14,16 +14,22 @@ import {
   Dialog, 
   DialogActions, 
   DialogContent, 
-  DialogTitle 
+  DialogTitle, 
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
-import { useDispatch } from 'react-redux';
-import { deleteProject, addProject } from '../../redux/projectSlice';
+import { useDispatch , useSelector } from 'react-redux';
+import { deleteProject, addProject, permanentlyDeleteProject, reopenProject } from '../../redux/projectSlice';
 import { deleteProject as deleteProjectService, createProject as createProjectService } from '../../services/projectService';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import ProjectForm from '../../components/project/ProjectForm';
 import { useAuth } from '../../context/AuthContext';
+import {RootState} from '../../redux/store'
 
 interface Project {
   id: string;
@@ -40,8 +46,13 @@ const DashboardPage: React.FC = () => {
   const [filterOption, setFilterOption] = useState('all');  // Customize this further if needed
   const [sortDirection, setSortDirection] = useState('asc'); // Add sort direction state
   const [openDialog, setOpenDialog] = useState(false);
+  const [showDeletedProjectsDialog , setShowDeletedProjectsDialog] = useState(false)
   
+
+  const project = useSelector((state: RootState) => state.projects.projects)
+  const deletedProjects = useSelector((state: RootState) => state.projects.deletedProjects)
   const dispatch = useDispatch();
+  
 
 
   // Handle project deletion
@@ -65,6 +76,17 @@ const DashboardPage: React.FC = () => {
       console.error('Failed to create project:', error);
     }
   };
+
+  //  Reopen a project
+  const handleReopenProject = (id: string) => {
+    dispatch(reopenProject(id))
+  }
+
+
+  // permanently delete a project
+  const handlePermanentlyDeleteProject = (id: string) => {
+    dispatch(permanentlyDeleteProject(id))
+  }
 
   // Drag and drop functionality
   const onDragEnd = (result: any) => {
@@ -201,6 +223,51 @@ const DashboardPage: React.FC = () => {
         </Droppable>
       </DragDropContext>
 
+    {/* Button to open deleted projects dialog */}
+
+    <Button onClick={() => setShowDeletedProjectsDialog(true)} style={{ position: 'absolute', bottom: '1rem', right: '1rem'}}>
+       Show deleted projects
+    </Button>
+
+    {/* Dialog to show deleted projects */}
+    <Dialog
+        open={showDeletedProjectsDialog}
+        onClose={() => setShowDeletedProjectsDialog(false)}
+      >
+        <DialogTitle>Deleted Projects</DialogTitle>
+        <DialogContent>
+          {deletedProjects.length > 0 ? (
+            <List>
+              {deletedProjects.map((project) => (
+                <div key={project.id}>
+                  <ListItem>
+                    <ListItemText primary={project.title} secondary={project.description} />
+                    <Button
+                      onClick={() => handleReopenProject(project.id)}
+                      color="primary"
+                    >
+                      Reopen
+                    </Button>
+                    <Button
+                      onClick={() => handlePermanentlyDeleteProject(project.id)}
+                      color="secondary"
+                    >
+                      Delete Permanently
+                    </Button>
+                  </ListItem>
+                  <Divider />
+                </div>
+              ))}
+            </List>
+          ) : (
+            <Typography>No deleted projects.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeletedProjectsDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Project Creation Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Create New Project</DialogTitle>
@@ -213,6 +280,8 @@ const DashboardPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+    
     </>
   );
 };

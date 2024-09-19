@@ -35,7 +35,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   }
 
 
-  const login = (username: string, email: string) => {
+  const login = (username: string, email: string ) => {
     setIsAuthenticated(true);
     setUsername(username);
     setEmail(email);

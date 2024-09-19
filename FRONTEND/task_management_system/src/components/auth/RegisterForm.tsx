@@ -110,7 +110,7 @@ const RegisterForm: React.FC = () => {
             </form>
 
             <Typography variant='body2' sx={{ marginTop: 2 }}>
-              Already have an account? <a href="/signin">Sign in </a>
+              Already have an account? <a href="/signin" className='logi-reg-button'>Sign in </a>
             </Typography>
 
           </Grid>

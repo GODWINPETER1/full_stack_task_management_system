@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Grid, Card, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { TextField, Button, Container, Typography, Grid, Card, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import GoogleIcon from '@mui/icons-material/Google';
+import MicrosoftIcon from '@mui/icons-material/Microsoft'; // You'll need to use a custom icon for Microsoft or a suitable replacement.
+import SlackIcon from '@mui/icons-material/Chat'; // You can replace this with a more specific Slack icon if you have one.
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Adjust the path as needed
-import GoogleLoginButton from '../common/GoogleLogin'; // Import the GoogleLoginButton component
+import { useAuth } from '../../context/AuthContext';
 
 const LoginForm: React.FC = () => {
-  const { login } = useAuth(); // Use useAuth here
+  const { login } = useAuth();
 
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -20,23 +21,29 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { username, email, password });
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { email, password});
 
-      console.log(response);
-      // Assuming response.data contains username and email
+      const token = response.data.access_token;
+      console.log(token)
+      localStorage.setItem("accessToken" , token)
       login(response.data.username, response.data.email);
-      setSuccessDialogOpen(true); // Show success dialog
+      setSuccessDialogOpen(true);
+      
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000); // Delay navigation to allow dialog display
+        navigate('/dashboard/projects');
+      }, 2000);
     } catch (error) {
-      setErrorDialogOpen(true);  // Show error dialog
+      setErrorDialogOpen(true);
     }
   };
 
   const handleCloseDialog = () => {
     setSuccessDialogOpen(false);
     setErrorDialogOpen(false);
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://127.0.0.1:8000/api/v1/auth/google";
   };
 
   return (
@@ -61,16 +68,6 @@ const LoginForm: React.FC = () => {
               Login
             </Typography>
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-              {/* <TextField
-                id="username"
-                variant='standard'
-                label="Username"
-                required
-                fullWidth
-                margin="normal"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              /> */}
               <TextField
                 id="email"
                 variant='standard'
@@ -80,6 +77,7 @@ const LoginForm: React.FC = () => {
                 margin="normal"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                
               />
               <TextField
                 id="password"
@@ -92,14 +90,41 @@ const LoginForm: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <Button type="submit" style={{ backgroundColor: '#9ACD32', color: '#000', marginTop: 16 }} fullWidth>
+              <Button  type="submit" style={{ backgroundColor: '#9ACD32', color: '#000', marginTop: 16 }} fullWidth>
                 Login
               </Button>
-
-              {/* Add GoogleLoginButton here */}
-              <GoogleLoginButton />
-
+               <p> Or continue with </p>
             </form>
+
+            {/* Social login buttons */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+              
+              <Button 
+                startIcon={<GoogleIcon style={{color: '#a9fd00'}} />} 
+                onClick={handleGoogleLogin}
+                variant="outlined" 
+                fullWidth 
+                style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
+              >
+                Google
+              </Button>
+              <Button 
+                startIcon={<MicrosoftIcon style={{color: '#a9fd00'}}/>} 
+                variant="outlined" 
+                fullWidth 
+                style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
+              >
+                Microsoft
+              </Button>
+              <Button 
+                startIcon={<SlackIcon style={{color: '#a9fd00'}} />} 
+                variant="outlined" 
+                fullWidth
+                style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
+              >
+                Slack
+              </Button>
+            </Box>
 
             <Typography variant='body2' sx={{ marginTop: 2 }}>
               Don't have an account? <a href="/"> Register </a>
