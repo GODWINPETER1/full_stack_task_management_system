@@ -19,6 +19,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Box
   
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
@@ -26,10 +27,11 @@ import { useDispatch , useSelector } from 'react-redux';
 import { deleteProject, addProject, permanentlyDeleteProject, reopenProject } from '../../redux/projectSlice';
 import { deleteProject as deleteProjectService, createProject as createProjectService } from '../../services/projectService';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { Navigate, useNavigate, useOutletContext } from 'react-router-dom';
 import ProjectForm from '../../components/project/ProjectForm';
 import { useAuth } from '../../context/AuthContext';
 import {RootState} from '../../redux/store'
+import { useTheme } from '@emotion/react';
 
 interface Project {
   id: string;
@@ -52,6 +54,8 @@ const DashboardPage: React.FC = () => {
   const project = useSelector((state: RootState) => state.projects.projects)
   const deletedProjects = useSelector((state: RootState) => state.projects.deletedProjects)
   const dispatch = useDispatch();
+
+  const navigate = useNavigate()
   
 
 
@@ -72,6 +76,9 @@ const DashboardPage: React.FC = () => {
       const createdProject = await createProjectService(newProject);
       dispatch(addProject(createdProject));
       setOpenDialog(false);
+
+      // navigate to the task page after the project is created
+      
     } catch (error) {
       console.error('Failed to create project:', error);
     }
@@ -231,42 +238,57 @@ const DashboardPage: React.FC = () => {
 
     {/* Dialog to show deleted projects */}
     <Dialog
-        open={showDeletedProjectsDialog}
-        onClose={() => setShowDeletedProjectsDialog(false)}
-      >
-        <DialogTitle>Deleted Projects</DialogTitle>
-        <DialogContent>
-          {deletedProjects.length > 0 ? (
-            <List>
-              {deletedProjects.map((project) => (
-                <div key={project.id}>
-                  <ListItem>
-                    <ListItemText primary={project.title} secondary={project.description} />
-                    <Button
-                      onClick={() => handleReopenProject(project.id)}
-                      color="primary"
-                    >
-                      Reopen
-                    </Button>
-                    <Button
-                      onClick={() => handlePermanentlyDeleteProject(project.id)}
-                      color="secondary"
-                    >
-                      Delete Permanently
-                    </Button>
-                  </ListItem>
-                  <Divider />
-                </div>
-              ))}
-            </List>
-          ) : (
-            <Typography>No deleted projects.</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeletedProjectsDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+  open={showDeletedProjectsDialog}
+  onClose={() => setShowDeletedProjectsDialog(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle align="center">Deleted Projects</DialogTitle>
+  <DialogContent>
+    {deletedProjects.length > 0 ? (
+      <List>
+        {deletedProjects.map((project) => (
+          <div key={project.id}>
+            <ListItem>
+              <Box display="flex" flexDirection="column" flexGrow={1}>
+                <Typography variant="h6">{project.title}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {project.description}
+                </Typography>
+              </Box>
+              <Button
+                onClick={() => handleReopenProject(project.id)}
+                color="primary"
+                size="small" // Reduced button size
+                variant="contained" // Add contained style
+                sx={{ marginLeft: 1 }} // Add margin to the left
+              >
+                Reopen
+              </Button>
+              <Button
+                onClick={() => handlePermanentlyDeleteProject(project.id)}
+                color="error" // Changed to error color for better indication
+                size="small" // Reduced button size
+                variant="contained" // Add contained style
+                sx={{ marginLeft: 1 }} // Add margin to the left
+              >
+                Delete Permanently
+              </Button>
+            </ListItem>
+            <Divider />
+          </div>
+        ))}
+      </List>
+    ) : (
+      <Typography>No deleted projects.</Typography>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setShowDeletedProjectsDialog(false)} color="primary">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
 
       {/* Project Creation Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>

@@ -12,6 +12,8 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String , nullable=True)
+    status = Column(String)
+    due_date = Column(DateTime)
     project_id = Column(Integer, ForeignKey("projects.id"))
     
     project = relationship("Project", back_populates="tasks")

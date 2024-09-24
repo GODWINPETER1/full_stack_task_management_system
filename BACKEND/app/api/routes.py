@@ -50,3 +50,5 @@ def get_deleted_projects(skip: int = 0, limit: int = 10, db: Session = Depends(g
     return db.query(Project).filter(Project.deleted == True).offset(skip).limit(limit).all()
 
 
+
+

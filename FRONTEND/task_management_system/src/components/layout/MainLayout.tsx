@@ -44,6 +44,7 @@ const MainLayout: React.FC = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <Sidebar isCollapsed={isCollapsed} projects={projects} />
+      
       <Box sx={{ flexGrow: 1 }}>
         <Navbar onToggleSidebar={handleToggleSidebar} />
         <Box sx={{ padding: '2rem' }}>

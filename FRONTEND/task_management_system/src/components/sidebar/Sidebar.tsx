@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
       <List>
         {projects.map((project) => (
           <div key={project.id}>
-            <ListItemButton onClick={() => navigate(`/project/${project.id}`)}>
+            <ListItemButton onClick={() => navigate(`projects/${project.id}`)}>
               <ListItemIcon>
                 <FolderIcon />
               </ListItemIcon>
