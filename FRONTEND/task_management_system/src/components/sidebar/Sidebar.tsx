@@ -8,6 +8,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import SortIcon from '@mui/icons-material/Sort';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
+import { AccountTree } from '@mui/icons-material';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -30,10 +31,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
     <div style={{ width: isCollapsed ? '80px' : '250px', backgroundColor: '#F4F5F7', height: '100vh', padding: '1rem', transition: 'width 0.3s ease' }}>
       <h3 style={{ fontWeight: 'bold', marginBottom: '1rem', display: isCollapsed ? 'none' : 'block' }}>Menu</h3>
       <List>
+
+         {/* Projects Menu */}
+         <ListItemButton onClick={() => navigate('/dashboard/overview')}>
+          <ListItemIcon>
+            <DashboardIcon />
+          </ListItemIcon>
+          <ListItemText primary="Overview" sx={{ display: isCollapsed ? 'none' : 'block' }} />
+        </ListItemButton>
+        <Divider />
+
+
         {/* Projects Menu */}
         <ListItemButton onClick={() => navigate('/dashboard/projects')}>
           <ListItemIcon>
-            <DashboardIcon />
+            <AccountTree />
           </ListItemIcon>
           <ListItemText primary="Projects" sx={{ display: isCollapsed ? 'none' : 'block' }} />
         </ListItemButton>

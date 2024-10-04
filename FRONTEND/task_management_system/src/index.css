@@ -148,6 +148,14 @@ button {
   }
 }
 
+.dialog-paragraphy {
+   font-size: 15px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: normal;
+    color: rgb(138, 148, 153);
+}
+
 
 
 

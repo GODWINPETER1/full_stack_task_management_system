@@ -9,7 +9,9 @@ import DashboardPage from './pages/Projects/DashboardPage'; // Updated import
 import MembersPage from './pages/Members/Members';
 import AgendaPage from './pages/Agenda/Agenda';
 import ReportsPage from './pages/Reports/Reports';
+import Overview from './pages/Overview/overview';
 import ProjectPage from './pages/Projects/ProjectPage';
+
 
 const App: React.FC = () => {
   return (
@@ -18,6 +20,7 @@ const App: React.FC = () => {
         <Route path="/" element={<RegisterPage />} />
         <Route path="/signin" element={<LoginPage />} />
         <Route path="/dashboard/*" element={<MainLayout />}>
+          <Route path='overview' element={<Overview/>}/>    
           <Route path="projects" element={<DashboardPage  />} />
           <Route path="members" element={<MembersPage />} />
           <Route path="agenda" element={<AgendaPage />} />

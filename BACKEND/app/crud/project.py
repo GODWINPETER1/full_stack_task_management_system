@@ -3,16 +3,25 @@ from app.models.project import Project
 from app.schemas.project import ProjectCreate
 
 # Create a new project
-def create_project(db: Session, project: ProjectCreate):
-    db_project = Project(**project.dict())
+def create_project(db: Session, project: ProjectCreate, user_id: int) -> Project:
+    db_project = Project(
+        title=project.title,
+        description=project.description,
+        user_id = user_id  # Assign the user ID here
+    )
     db.add(db_project)
     db.commit()
     db.refresh(db_project)
     return db_project
 
 # Get all projects
-def get_projects(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Project).filter(Project.deleted == False).offset(skip).limit(limit).all()
+# Get all projects for a specific user
+def get_projects(db: Session, user_id: int, skip: int = 0, limit: int = 10):
+    return db.query(Project).filter(
+        Project.user_id == user_id, 
+        Project.deleted == False  # Exclude deleted projects
+    ).offset(skip).limit(limit).all()
+
 
 
 # Get a project by ID

@@ -21,12 +21,19 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { email, password});
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { email, password });
 
       const token = response.data.access_token;
+      const refresh_token = response.data.refresh_token
+      const userId = response.data.id
       console.log(token)
+      console.log(refresh_token)
+      console.log(userId)
+
       localStorage.setItem("accessToken" , token)
-      login(response.data.username, response.data.email);
+      localStorage.setItem("refreshToken" , refresh_token)
+
+      login(response.data.username, response.data.email , userId );
       setSuccessDialogOpen(true);
       
       setTimeout(() => {

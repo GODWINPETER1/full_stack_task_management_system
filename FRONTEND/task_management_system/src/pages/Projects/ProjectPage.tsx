@@ -21,6 +21,7 @@ interface Task {
 }
 
 const ProjectPage: React.FC = () => {
+  
   const { projectId } = useParams<{ projectId: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const tasks = useSelector((state: RootState) => state.tasks.tasks);
@@ -30,17 +31,25 @@ const ProjectPage: React.FC = () => {
   const [newTaskDueDate, setNewTaskDueDate] = useState<string | null>(null);
   const [open, setOpen] = useState(false);  // Dialog open/close state
 
+  const token = localStorage.getItem('accessToken')
+  
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks` , {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+        );
         dispatch(setTasks(response.data));
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
     };
     fetchTasks();
-  }, [projectId, dispatch]);
+  }, [projectId, dispatch , token]);
 
   const handleCreateTask = async () => {
     const newTask = {
@@ -51,7 +60,15 @@ const ProjectPage: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks`, newTask);
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks`,
+        newTask,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,  // Add the token to the headers
+          },
+        }
+      );
       dispatch(addTask(response.data));
       setNewTaskTitle('');
       setNewTaskDescription('');
@@ -148,7 +165,7 @@ const ProjectPage: React.FC = () => {
                         marginBottom: '8px', // Reduce space between task cards
                       }}
                     >
-                      <TaskCard task={task} onDelete={handleDeleteTask} />
+                      <TaskCard  task={task} onDelete={handleDeleteTask} />
                     </div>
                   )}
                 </Draggable>

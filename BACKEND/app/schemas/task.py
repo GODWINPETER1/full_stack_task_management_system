@@ -15,6 +15,7 @@ class TaskBase(BaseModel):
     description: Optional[str] = None
     status: Optional[TaskStatus] = TaskStatus.todo  # Default status "To Do"
     due_date: Optional[datetime] = None
+    # assigned_to_id: Optional[int]
 
 class TaskCreate(TaskBase):
     pass
@@ -24,10 +25,12 @@ class TaskUpdate(BaseModel):
     description: Optional[str] = None
     status: Optional[str] = None
     due_date: Optional[datetime] = None
+    # assigned_to_id:Optional[int]
 
 class Task(TaskBase):
     id: int
     project_id: int
+    assigned_to_id: Optional[int]
 
     class Config:
         from_attributes = True

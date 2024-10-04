@@ -25,7 +25,7 @@ import {
 import { Edit, Delete, Add } from '@mui/icons-material';
 import { useDispatch , useSelector } from 'react-redux';
 import { deleteProject, addProject, permanentlyDeleteProject, reopenProject } from '../../redux/projectSlice';
-import { deleteProject as deleteProjectService, createProject as createProjectService } from '../../services/projectService';
+import {  deleteProject as deleteProjectService, createProject as createProjectService } from '../../services/projectService';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { Navigate, useNavigate, useOutletContext } from 'react-router-dom';
 import ProjectForm from '../../components/project/ProjectForm';

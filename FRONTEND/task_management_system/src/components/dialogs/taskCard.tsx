@@ -1,56 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
-  Card, CardContent, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, MenuItem, Checkbox, FormControlLabel,
+  Card, CardContent, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, List, ListItem, ListItemText, ButtonBase, Menu, MenuItem,
+  Typography,
 } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icon for the menu
-import UploadIcon from '@mui/icons-material/Upload'; // Icon for file upload
-import DeleteIcon from '@mui/icons-material/Delete'; // Icon for deleting subtasks
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeleteIcon from '@mui/icons-material/Delete';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
-interface Subtask {
+interface User {
   id: number;
-  title: string;
-  completed: boolean;
+  username: string;
+  email: string;
 }
 
 interface TaskCardProps {
   task: {
     id: number;
     title: string;
-    description?: string;
-    status: string;
-    due_date?: string | null;
-    priority?: 'Low' | 'Medium' | 'High';
-    subtasks?: Subtask[];
-    attachments?: string[];
+    assigned_to_id?: number | null;
   };
   onDelete: (id: number) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
   const [openDialog, setOpenDialog] = useState(false);
-  const [subtasks, setSubtasks] = useState(task.subtasks || []);
-  const [newSubtask, setNewSubtask] = useState('');
-  const [priority, setPriority] = useState(task.priority || 'Medium');
-  const [comments, setComments] = useState('');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [assignedUser, setAssignedUser] = useState<User[]>([]);
 
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
-  
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
-  // Function to add a new subtask
-  const handleAddSubtask = () => {
-    setSubtasks([
-      ...subtasks,
-      { id: subtasks.length + 1, title: newSubtask, completed: false },
-    ]);
-    setNewSubtask('');
-  };
+  useEffect(() => {
+    const searchUsers = async (query: string) => {
+      if (query.length > 0) {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/?search=${query}`);
+          setFilteredUsers(response.data);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        }
+      } else {
+        setFilteredUsers([]);
+      }
+    };
 
-  // Function to remove a subtask
-  const handleRemoveSubtask = (id: number) => {
-    setSubtasks(subtasks.filter((subtask) => subtask.id !== id));
-  };
+    const delayDebounceFn = setTimeout(() => {
+      searchUsers(searchTerm);
+    }, 100);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+
+  // Function to invite a user
+  const handleInviteUser = (user: User) => {
+
+    if (!assignedUser.some((invited) => invited.id === user.id)) {
+      setAssignedUser([...assignedUser , user])
+    }
+    setSearchTerm('') // clear search term
+    setFilteredUsers([])
+  }
 
   return (
     <>
@@ -66,88 +83,79 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
         </CardContent>
       </Card>
 
-      {/* Task Details Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth>
-        <DialogTitle>Task Options</DialogTitle>
-        <DialogContent>
-          <p><strong>Task Title:</strong> {task.title}</p>
-          <p><strong>Description:</strong> {task.description || 'No description provided'}</p>
-          <p><strong>Due Date:</strong> {task.due_date ? task.due_date : 'No due date'}</p>
-
-          {/* Priority Selector */}
-          <TextField
-            select
-            label="Priority"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as 'Low' | 'Medium' | 'High')}
-            fullWidth
-            margin="dense"
-          >
-            <MenuItem value="Low">Low</MenuItem>
-            <MenuItem value="Medium">Medium</MenuItem>
-            <MenuItem value="High">High</MenuItem>
-          </TextField>
-
-          {/* Subtasks */}
-          <h5>Subtasks</h5>
-          {subtasks.map((subtask) => (
-            <div key={subtask.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={subtask.completed}
-                    onChange={() =>
-                      setSubtasks(subtasks.map((s) => s.id === subtask.id
-                        ? { ...s, completed: !s.completed } : s))
-                    }
-                  />
-                }
-                label={subtask.title}
-              />
-              <IconButton onClick={() => handleRemoveSubtask(subtask.id)}>
-                <DeleteIcon />
+        <DialogTitle>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Assign Task</span>
+            <div>
+              <IconButton onClick={handleMenuOpen}>
+                <MoreHorizIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleMenuClose}>Archive Task</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Duplicate Task</MenuItem>
+              </Menu>
+              <IconButton onClick={handleCloseDialog}>
+                <CancelIcon />
               </IconButton>
             </div>
-          ))}
+          </div>
+        </DialogTitle>
+
+        <DialogContent>
+          <p className='dialog-paragraphy'>Managing access keeps data secure. Set permissions for your project and invite new users or groups. Here's who has access right now:</p>
+
+          {/* User Assignment/Search */}
           <TextField
-            label="Add Subtask"
-            value={newSubtask}
-            onChange={(e) => setNewSubtask(e.target.value)}
+            label="Search Users"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             fullWidth
             margin="dense"
+            placeholder="Invite others by entering a name or email"
           />
-          <Button onClick={handleAddSubtask} color="primary">Add Subtask</Button>
 
-          {/* Attachments */}
-          <h5>Attachments</h5>
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<UploadIcon />}
-            color="primary"
-          >
-            Upload File
-            <input type="file" hidden />
-          </Button>
+          {/* List of filtered users */}
+          <List>
+            {filteredUsers.map((user) => (
+              <ButtonBase
+                key={user.id}
+                onClick={() => handleInviteUser(user)}
+                style={{ width: '100%' }}
+              >
+                <ListItem component="li" style={{ width: '100%' }}>
+                  <ListItemText primary={user.username} secondary={user.email} />
+                </ListItem>
+              </ButtonBase>
+            ))}
+          </List>
+           {
+             assignedUser.length > 0 && (
+             <CardContent>
+                <Typography variant='body1'> <strong> {assignedUser.length} Members </strong> </Typography>
 
-          {/* Comments Section */}
-          <h5>Comments</h5>
-          <TextField
-            label="Add a Comment"
-            value={comments}
-            onChange={(e) => setComments(e.target.value)}
-            fullWidth
-            margin="dense"
-            multiline
-            rows={3}
-          />
+                    <List>
+                          {
+                            assignedUser.map((user) => (
+                              <ListItem key = {user.id}>
+                                 <ListItemText primary={user.username}></ListItemText>
+                              </ListItem>
+                            ))
+                          }
+                    </List>
+             </CardContent> 
+              
+             )
+           }
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => onDelete(task.id)} color="secondary">
+          <Button onClick={() => onDelete(task.id)} color="secondary" startIcon={<DeleteIcon />}>
             Delete Task
-          </Button>
-          <Button onClick={handleCloseDialog} color="primary">
-            Close
           </Button>
         </DialogActions>
       </Dialog>

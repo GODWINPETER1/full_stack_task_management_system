@@ -29,10 +29,38 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(hours=1)
+        expire = datetime.utcnow() + timedelta(hours = 1)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
+
+def create_refresh_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=7)  # Refresh token valid for 7 days
+    to_encode.update({"exp": expire})
+    encoded_refresh_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_refresh_jwt
+
+
+
+@router.post("/refresh")
+def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        
+        user = db.query(User).filter(User.id == int(user_id)).first()
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        
+        # Issue a new access token
+        access_token = create_access_token(data={"sub": str(user.id)})
+        return {"access_token": access_token}
+    
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
 
 # user registration 
@@ -67,10 +95,13 @@ async def login_user(user_in: UserLogin, db: Session = Depends(get_db)):
     
     # Create a token payload
     data = {"sub" : str(user.id)}
-    access_token = create_access_token(data)
+    access_token = create_access_token(data = {"sub" : str(user.id)})
+    refresh_token = create_refresh_token(data = {"sub" : str(user.id)})
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "username": user.username,
-        "email": user.email
+        "email": user.email,
+        "id" : user.id
     }

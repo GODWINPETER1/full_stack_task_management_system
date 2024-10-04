@@ -15,5 +15,7 @@ class Task(Base):
     status = Column(String)
     due_date = Column(DateTime)
     project_id = Column(Integer, ForeignKey("projects.id"))
+    assigned_to_id = Column(Integer , ForeignKey("users.id"))
     
+    assigned_to = relationship("User" , back_populates= "tasks_assigned")
     project = relationship("Project", back_populates="tasks")

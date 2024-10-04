@@ -20,14 +20,16 @@ const MainLayout: React.FC = () => {
     const fetchProjects = async () => {
       try {
         const data = await getProjects();
+        console.log(data)
         dispatch(setProjects(data));
-      } catch (error) {
-        console.error('Failed to fetch projects:', error);
+      } catch (error: any) {
+        console.error('Failed to fetch projects:', error?.response || error);
       }
     };
-
+  
     fetchProjects();
   }, [dispatch]);
+  
 
   const handleToggleSidebar = () => {
     setIsCollapsed((prev) => !prev);

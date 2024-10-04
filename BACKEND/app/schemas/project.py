@@ -6,6 +6,8 @@ from app.schemas.task import Task
 class ProjectBase(BaseModel):
     title: str
     description: Optional[str] = None
+    
+   
 
 # Schema for Creating Projects
 class ProjectCreate(ProjectBase):

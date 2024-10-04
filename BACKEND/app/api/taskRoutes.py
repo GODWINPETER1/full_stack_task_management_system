@@ -4,20 +4,24 @@ from typing import List
 from app.schemas.task import TaskCreate, TaskUpdate, Task as TaskSchema
 from app.models.task import Task
 from app.models.project import Project
+from app.models.user import User
 from app.db.session import get_db
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
 # Create a task
 @router.post("/{project_id}/tasks", response_model=TaskSchema)
 def create_task_for_project(
-    project_id: int, task: TaskCreate, db: Session = Depends(get_db)
+    project_id: int, task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    new_task = Task(**task.dict(), project_id=project_id)
+    # Create the new task and set the assigned_to_id
+    new_task = Task(**task.dict(), project_id=project_id, assigned_to_id=current_user.id)
+    
     db.add(new_task)
     db.commit()
     db.refresh(new_task)

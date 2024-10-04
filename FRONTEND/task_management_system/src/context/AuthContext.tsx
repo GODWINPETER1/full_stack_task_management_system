@@ -5,20 +5,25 @@ interface AuthContextType {
   isAuthenticated: boolean;
   username: string;
   email: string;
+  userId: number | null;
   setUsername: (username : string) => void;
   setEmail: (email: string) => void;
   register: (username: string , email: string , password: string) => Promise<void>; 
-  login: (username: string, email: string) => void;
+  login: (username: string, email: string , userId: number) => void;
   logout: () => void;
 }
+
+
 
 // Create the context with undefined as default
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [userId , setUserId] = useState<number | null>(null)
 
 
 
@@ -26,8 +31,10 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/v1/register', { username , email , password});
+      console.log(response)
       setUsername(response.data.username)
       setEmail(response.data.email)
+      
     } catch (error) {
 
       throw new Error('Registration failed');
@@ -35,15 +42,19 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   }
 
 
-  const login = (username: string, email: string ) => {
+  const login = (username: string, email: string , userId: number  ) => {
     setIsAuthenticated(true);
     setUsername(username);
     setEmail(email);
+    setUserId(userId)
+    
+  
 
     // save to the localstorage to avoid lost of data when refresh
     localStorage.setItem('isAuthenticated' , 'true');
     localStorage.setItem('username' , username)
     localStorage.setItem('email' , email)
+    localStorage.setItem('userId' , userId.toString())
   };
 
   const logout = () => {
@@ -65,11 +76,12 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setIsAuthenticated(true)
       setUsername(localStorage.getItem('username') || '');
       setEmail(localStorage.getItem('email') || '')
+      setUserId(Number(localStorage.getItem('userId')) || null)
     }
   } , [])
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername , setEmail , register ,login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername , setEmail , register ,login, logout , userId }}>
       {children}
     </AuthContext.Provider>
   );

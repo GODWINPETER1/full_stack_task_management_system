@@ -2,6 +2,9 @@ from fastapi import FastAPI;
 from app.api.v1.endpoints import router as api_router
 from app.api.routes import router as project_router
 from app.api.taskRoutes import router as task_router
+from app.api.usersRoutes import router as user_router
+from app.api.analyticsTask import router as analytics_task_router
+from app.api.analyticsProject import router as analytics_project_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.oauth import router as oauth_router
 from starlette.middleware.sessions import SessionMiddleware
@@ -30,3 +33,6 @@ app.include_router(api_router , prefix = "/api/v1")
 app.include_router(oauth_router, prefix="/api/v1")
 app.include_router(project_router , prefix = "/api/v1/projects")
 app.include_router(task_router , prefix = "/api/v1/projects")
+app.include_router(user_router , prefix="/api/v1")
+app.include_router(analytics_task_router , prefix = "/api/v1/analytics")
+app.include_router(analytics_project_router , prefix = "/api/v1/analytics")
