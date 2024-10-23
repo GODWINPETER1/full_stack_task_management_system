@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react'; 
 import axios from 'axios';
 
 // Define the type for the context
@@ -13,13 +13,13 @@ interface AuthContextType {
   username: string;
   email: string;
   userId: number | null;
+  role: string | null; // Add role to context
   user: User | null; // User information for Google or Slack login
   setUsername: (username: string) => void;
   setEmail: (email: string) => void;
   register: (username: string, email: string, password: string) => Promise<void>;
-  login: (username: string, email: string, userId: number) => void;
-  googleLogin: (email: string, picture: string, name: string) => void; // Google login
-  slackLogin: (email: string, picture: string, name: string) => void; // Slack login
+  login: (username: string, email: string, userId: number, role: string) => void; // Accept role in login
+  googleLogin: (email: string, picture: string, name: string) => void;
   logout: () => void;
 }
 
@@ -31,7 +31,8 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
-  const [user, setUser] = useState<User | null>(null); // State for Google or Slack user info
+  const [role, setRole] = useState<string | null>(null); // Role state
+  const [user, setUser] = useState<User | null>(null);
 
   const register = async (username: string, email: string, password: string) => {
     try {
@@ -43,17 +44,19 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
-  const login = (username: string, email: string, userId: number) => {
+  const login = (username: string, email: string, userId: number, role: string) => {
     setIsAuthenticated(true);
     setUsername(username);
     setEmail(email);
     setUserId(userId);
+    setRole(role);  // Set role from login
 
     // Save to localStorage to avoid loss of data when refresh
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('username', username);
     localStorage.setItem('email', email);
     localStorage.setItem('userId', userId.toString());
+    localStorage.setItem('role', role); // Store role in localStorage
   };
 
   const googleLogin = (email: string, picture: string, name: string) => {
@@ -64,38 +67,21 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       picture,
       name
     });
-
-    // Save to localStorage
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('email', email);
-  };
-
-  // Add the new slackLogin function
-  const slackLogin = (email: string, picture: string, name: string) => {
-    setIsAuthenticated(true);
-    setEmail(email);
-    setUser({
-      email,
-      picture,
-      name
-    });
-
-    // Save to localStorage
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('email', email);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUsername('');
     setEmail('');
-    setUser(null); // Clear user info on logout
+    setUser(null);
+    setRole(null); // Clear role on logout
 
     // Clear localStorage
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('username');
     localStorage.removeItem('email');
     localStorage.removeItem('userId');
+    localStorage.removeItem('role'); // Clear role from localStorage
   };
 
   useEffect(() => {
@@ -106,11 +92,12 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setUsername(localStorage.getItem('username') || '');
       setEmail(localStorage.getItem('email') || '');
       setUserId(Number(localStorage.getItem('userId')) || null);
+      setRole(localStorage.getItem('role') || null); // Load role from localStorage
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername, setEmail, register, login, googleLogin, slackLogin, logout, user, userId }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername, setEmail, register, login, googleLogin, logout, user, userId, role }}>
       {children}
     </AuthContext.Provider>
   );

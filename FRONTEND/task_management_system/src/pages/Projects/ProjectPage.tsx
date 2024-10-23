@@ -84,20 +84,35 @@ const ProjectPage: React.FC = () => {
     if (updatedTask) {
       const newStatus = status === 'Doing' ? 'In Progress' : status;
       try {
-        const response = await axios.put(`http://127.0.0.1:8000/api/v1/projects/tasks/${id}`, {
-          ...updatedTask,
-          status: newStatus,
-        });
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/v1/projects/tasks/${id}`,
+          {
+            ...updatedTask,
+            status: newStatus,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,  // Ensure the token is passed here
+            },
+          }
+        );
         dispatch(updateTask(response.data));
       } catch (error) {
         console.error("Error updating task:", error);
       }
     }
   };
+  
 
   const handleDeleteTask = async (id: number) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/projects/tasks/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/api/v1/projects/tasks/${id}` , 
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
       dispatch(deleteTask(id));
     } catch (error) {
       console.error("Error deleting task:", error);

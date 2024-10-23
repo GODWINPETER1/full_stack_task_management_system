@@ -17,4 +17,4 @@ class User(Base):
     projects = relationship("Project" , back_populates = "owner")
     tasks_assigned = relationship("Task" , back_populates="assigned_to")
     comments = relationship("Comment" , back_populates="user")
-    
+    roles = relationship("UserRole" , back_populates="user")

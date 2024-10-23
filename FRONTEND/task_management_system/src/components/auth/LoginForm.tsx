@@ -3,13 +3,12 @@ import { TextField, Button, Container, Typography, Grid, Card, Dialog, DialogTit
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import GoogleIcon from '@mui/icons-material/Google';
-import MicrosoftIcon from '@mui/icons-material/Microsoft'; // You'll need to use a custom icon for Microsoft or a suitable replacement.
-import SlackIcon from '@mui/icons-material/Chat'; // You can replace this with a more specific Slack icon if you have one.
+import MicrosoftIcon from '@mui/icons-material/Microsoft';
+import SlackIcon from '@mui/icons-material/Chat';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import GoogleAuthComponent from './GoogleAuth';
-import SlackAuthComponent from '../slackButton/Slack';
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth();
@@ -26,14 +25,15 @@ const LoginForm: React.FC = () => {
       const response = await axios.post('http://127.0.0.1:8000/api/v1/login', { email, password });
 
       const token = response.data.access_token;
-      const refresh_token = response.data.refresh_token
-      const userId = response.data.id
-     
+      const refresh_token = response.data.refresh_token;
+      const userId = response.data.id;
+      const role = response.data.role; // Assuming role is part of the response
+      console.log(role)
 
-      localStorage.setItem("accessToken" , token)
-      localStorage.setItem("refreshToken" , refresh_token)
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("refreshToken", refresh_token);
 
-      login(response.data.username, response.data.email , userId );
+      login(response.data.username, response.data.email, userId, role);  // Pass role to login
       setSuccessDialogOpen(true);
       
       setTimeout(() => {
@@ -48,7 +48,6 @@ const LoginForm: React.FC = () => {
     setSuccessDialogOpen(false);
     setErrorDialogOpen(false);
   };
-
 
   return (
     <Container sx={{
@@ -115,7 +114,6 @@ const LoginForm: React.FC = () => {
               </Button> */}
 
             
-              <SlackAuthComponent/>
             </Box>
 
             <Typography variant='body2' sx={{ marginTop: 2 }}>
