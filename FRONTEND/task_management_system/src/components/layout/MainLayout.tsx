@@ -9,7 +9,6 @@ import Navbar from '../navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 const MainLayout: React.FC = () => {
-  
   const dispatch = useDispatch();
   const projects = useSelector(selectProjects);
   const navigate = useNavigate();
@@ -20,16 +19,14 @@ const MainLayout: React.FC = () => {
     const fetchProjects = async () => {
       try {
         const data = await getProjects();
-        console.log(data)
         dispatch(setProjects(data));
       } catch (error: any) {
         console.error('Failed to fetch projects:', error?.response || error);
       }
     };
-  
+
     fetchProjects();
   }, [dispatch]);
-  
 
   const handleToggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
@@ -44,13 +41,15 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      {/* Sidebar */}
       <Sidebar isCollapsed={isCollapsed} projects={projects} />
-      
-      <Box sx={{ flexGrow: 1 }}>
+
+      {/* Main content area */}
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Navbar onToggleSidebar={handleToggleSidebar} />
-        <Box sx={{ padding: '2rem' }}>
-          {/* Render nested routes with context */}
+        {/* Scrollable middle content */}
+        <Box sx={{ flexGrow: 1, overflow: 'auto', padding: '2rem' }}>
           <Outlet context={{ projects, onEdit: handleEdit, onDelete: handleDelete }} />
         </Box>
       </Box>

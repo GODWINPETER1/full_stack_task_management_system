@@ -8,6 +8,8 @@ import SlackIcon from '@mui/icons-material/Chat'; // You can replace this with a
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import GoogleAuthComponent from './GoogleAuth';
+import SlackAuthComponent from '../slackButton/Slack';
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth();
@@ -26,9 +28,7 @@ const LoginForm: React.FC = () => {
       const token = response.data.access_token;
       const refresh_token = response.data.refresh_token
       const userId = response.data.id
-      console.log(token)
-      console.log(refresh_token)
-      console.log(userId)
+     
 
       localStorage.setItem("accessToken" , token)
       localStorage.setItem("refreshToken" , refresh_token)
@@ -49,9 +49,6 @@ const LoginForm: React.FC = () => {
     setErrorDialogOpen(false);
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = "http://127.0.0.1:8000/api/v1/auth/google";
-  };
 
   return (
     <Container sx={{
@@ -106,31 +103,19 @@ const LoginForm: React.FC = () => {
             {/* Social login buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
               
-              <Button 
-                startIcon={<GoogleIcon style={{color: '#a9fd00'}} />} 
-                onClick={handleGoogleLogin}
-                variant="outlined" 
-                fullWidth 
-                style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
-              >
-                Google
-              </Button>
-              <Button 
+                <GoogleAuthComponent/>
+              
+              {/* <Button 
                 startIcon={<MicrosoftIcon style={{color: '#a9fd00'}}/>} 
                 variant="outlined" 
                 fullWidth 
                 style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
               >
                 Microsoft
-              </Button>
-              <Button 
-                startIcon={<SlackIcon style={{color: '#a9fd00'}} />} 
-                variant="outlined" 
-                fullWidth
-                style={{ marginRight: 8 , borderColor: '#a9fd0033' , color: '#000'}}
-              >
-                Slack
-              </Button>
+              </Button> */}
+
+            
+              <SlackAuthComponent/>
             </Box>
 
             <Typography variant='body2' sx={{ marginTop: 2 }}>

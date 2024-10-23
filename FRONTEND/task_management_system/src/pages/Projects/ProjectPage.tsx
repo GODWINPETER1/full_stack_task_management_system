@@ -15,7 +15,7 @@ import InfoIcon from '@mui/icons-material/Info';  // Importing Info icon for emp
 interface Task {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   status: string;
   due_date: string | null;
 }

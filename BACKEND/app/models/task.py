@@ -19,3 +19,5 @@ class Task(Base):
     
     assigned_to = relationship("User" , back_populates= "tasks_assigned")
     project = relationship("Project", back_populates="tasks")
+    comments = relationship("Comment" , back_populates="task")
+    reminders = relationship("Reminder" , back_populates="task")

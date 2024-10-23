@@ -11,10 +11,9 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
-  const { username, email , logout } = useAuth();
+  const { username, email, logout, user, isAuthenticated } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [profilePic, setProfilePic] = useState<String | null>(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -24,19 +23,14 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     setAnchorEl(null);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => setProfilePic(e.target?.result as string);
-      reader.readAsDataURL(event.target.files[0]);
-    }
-  };
-
   const handleLogout = () => {
-
-    logout()
-    navigate('/signin')
+    logout();
+    navigate('/signin');
   };
+
+  if (!isAuthenticated) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AppBar position="static" color="transparent" sx={{ boxShadow: 'none', borderBottom: '1px solid #e0e0e0' }}>
@@ -60,11 +54,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             onClick={handleMenu}
             color="inherit"
             startIcon={
-              profilePic ? (
-                <Avatar alt={username} src={profilePic ? profilePic.toString() : undefined} />
-              ) : (
-                <AccountCircleIcon />
-              )
+              <Avatar alt={username || user?.name} src={user?.picture || undefined}>
+                {username ? username.charAt(0) : user?.name?.charAt(0)}
+              </Avatar>
             }
             endIcon={<ArrowDropDownIcon />}
             sx={{
@@ -74,7 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
               '&:hover': { backgroundColor: '#f4f4f6' },
             }}
           >
-            <Typography variant="subtitle1">{username}</Typography>
+            {username || user?.name}
           </Button>
 
           <Menu
@@ -94,27 +86,14 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             }}
           >
             <Box sx={{ padding: '8px 16px' }}>
-              <MenuItem>
-                <Tooltip title="Change Photo">
-                  <IconButton component="label" style={{ position: 'relative', left: '70px' }}>
-                    <input
-                      hidden
-                      accept="image/*"
-                      type="file"
-                      onChange={handleImageUpload}
-                    />
-                    <Avatar alt={username} src={profilePic ? profilePic.toString() : undefined} />
-                  </IconButton>
-                </Tooltip>
-              </MenuItem>
               <MenuItem sx={{ justifyContent: 'center' }}>
                 <Typography variant="h6" fontWeight="bold">
-                  {username}
+                  {username || user?.name}
                 </Typography>
               </MenuItem>
               <MenuItem sx={{ justifyContent: 'center', marginBottom: '8px' }}>
                 <Typography variant="body2" color="textSecondary">
-                  {email}
+                  {email || user?.email}
                 </Typography>
               </MenuItem>
 

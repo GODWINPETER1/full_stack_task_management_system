@@ -25,6 +25,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         # Log for debugging (replace with proper logging in production)
         logging.debug(f"Payload: {payload}")  
         
+        # Ensure that the payload is not None
+        if payload is None:
+            raise credentials_exception
+        
         
         # Extract user_id (subject) from payload
         user_id: str = payload.get("sub")

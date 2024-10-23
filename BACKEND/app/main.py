@@ -7,6 +7,8 @@ from app.api.analyticsTask import router as analytics_task_router
 from app.api.analyticsProject import router as analytics_project_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.oauth import router as oauth_router
+from app.api.reminders import router as reminder_router
+from app.api.comments import router as comment_router
 from starlette.middleware.sessions import SessionMiddleware
 
 
@@ -31,8 +33,10 @@ app.add_middleware(SessionMiddleware, secret_key="GOCSPX-Wv6_bzBY6HDJaljRbAcyQ85
 
 app.include_router(api_router , prefix = "/api/v1")
 app.include_router(oauth_router, prefix="/api/v1")
+app.include_router(comment_router , prefix="/api/v1")
 app.include_router(project_router , prefix = "/api/v1/projects")
 app.include_router(task_router , prefix = "/api/v1/projects")
 app.include_router(user_router , prefix="/api/v1")
 app.include_router(analytics_task_router , prefix = "/api/v1/analytics")
 app.include_router(analytics_project_router , prefix = "/api/v1/analytics")
+app.include_router(reminder_router , prefix="/api/v1/reminders")
