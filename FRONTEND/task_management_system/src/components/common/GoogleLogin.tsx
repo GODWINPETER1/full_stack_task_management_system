@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 const GoogleLoginButton = () => {
 
 const handleGoogleLogin = () => {
-    window.location.href = "http://127.0.0.1:8000/api/v1/auth/google";
+    window.location.href = "http://127.0.0.1:8000/api/v1/auth/google/login";
   };
 
   return (

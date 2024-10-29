@@ -14,8 +14,8 @@ oauth = OAuth(config)
 # Register the Google OAuth
 oauth.register(
     name='google',
-    client_id='1004784113481-4qjar2oob7k3t6e7cfbjfs08mhteaj67.apps.googleusercontent.com',
-    client_secret='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',
+    client_id= "1004784113481-4qjar2oob7k3t6e7cfbjfs08mhteaj67.apps.googleusercontent.com",
+    client_secret= "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",
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     access_token_url='https://oauth2.googleapis.com/token',
     redirect_uri='http://127.0.0.1:8000/api/v1/auth/google/callback',

@@ -112,6 +112,8 @@ const Overview: React.FC = () => {
                 ) : (
                   <Typography variant="body2" color="textSecondary">Loading project analytics...</Typography>
                 )}
+
+                
               </CardContent>
             </Card>
           </Grid>

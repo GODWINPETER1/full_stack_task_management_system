@@ -1,3 +1,5 @@
+// src/components/tasks/TaskCard.tsx
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -8,14 +10,13 @@ import CommentForm from '../comments/CommentForm'; // Importing CommentForm
 import CommentList from '../comments/CommentList'; // Importing CommentList
 import ReminderForm from '../reminders/ReminderForm';
 import ReminderList from '../reminders/ReminderList';
-import Notification from '../notifications/Notification';
+import Notification from '../notifications/Notification'; // Importing Notification component
+import TagUserForm from '../tagging/TagUserForm'; // Importing TagUserForm
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { TransitionProps } from '@mui/material/transitions';
-
-
 
 // Transition for dialogs
 const Transition = React.forwardRef(function Transition(
@@ -51,7 +52,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
   const [comments, setComments] = useState([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-
 
   const token = localStorage.getItem('accessToken');
 
@@ -90,7 +90,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, token]);
 
-  // Function to invite a user
   const handleInviteUser = (user: User) => {
     if (!assignedUser.some((invited) => invited.id === user.id)) {
       setAssignedUser([...assignedUser, user]);
@@ -114,8 +113,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
 
   const handleNotificationClose = () => setNotificationOpen(false);
 
-  const handleReminderAdded = () => {
-    setNotificationMessage('Reminder added successfully!');
+  const handleTagUserAdded = () => {
+    setNotificationMessage('User tagged successfully!');
     setNotificationOpen(true);
   };
 
@@ -226,12 +225,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
           <CommentList comments={comments} />
 
           {/* Reminder content */}
-
-          <DialogContent>
-          <ReminderForm taskId={task.id} onReminderAdded={handleReminderAdded} />
+          <ReminderForm taskId={task.id} onReminderAdded={() => {
+            setNotificationMessage('Reminder added successfully!');
+            setNotificationOpen(true);
+          }} />
           <ReminderList taskId={task.id} />
-        </DialogContent>
 
+          {/* Tag User Form */}
+          <TagUserForm taskId={task.id} onTagAdded={handleTagUserAdded} />
         </DialogContent>
 
         <DialogActions>

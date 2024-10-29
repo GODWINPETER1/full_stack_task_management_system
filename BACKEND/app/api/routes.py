@@ -17,8 +17,8 @@ def create_project(project: ProjectCreate, current_user: User = Depends(get_curr
 
 # Get all projects
 @router.get("/", response_model=List[Project])
-def read_projects(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return crud_project.get_projects(db=db, skip=skip, limit=limit)
+def read_projects(skip: int = 0, limit: int = 10, current_user: User =(Depends(get_current_user))  , db: Session = Depends(get_db)):
+    return crud_project.get_projects(db=db, user_id=current_user.id , skip=skip, limit=limit)
 
 # Get a project by ID
 @router.get("/{project_id}", response_model=Project)

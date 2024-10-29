@@ -67,6 +67,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       picture,
       name
     });
+    localStorage.setItem("isAuthenticated" , "true")
   };
 
   const logout = () => {

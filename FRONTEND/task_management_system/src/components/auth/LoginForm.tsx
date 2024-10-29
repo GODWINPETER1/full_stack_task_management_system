@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import GoogleAuthComponent from './GoogleAuth';
+import GoogleLoginButton from '../common/GoogleLogin';
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth();
@@ -101,9 +102,8 @@ const LoginForm: React.FC = () => {
 
             {/* Social login buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-              
-                <GoogleAuthComponent/>
-              
+              <GoogleAuthComponent/>
+          
               {/* <Button 
                 startIcon={<MicrosoftIcon style={{color: '#a9fd00'}}/>} 
                 variant="outlined" 

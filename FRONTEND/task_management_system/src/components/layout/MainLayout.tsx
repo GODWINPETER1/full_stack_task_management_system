@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getProjects } from '../../services/projectService';
 import { setProjects, selectProjects } from '../../redux/projectSlice';
 import Navbar from '../navbar/Navbar';
+import NotificationList from '../notifications/NotificationList';
 import { useNavigate } from 'react-router-dom';
 
 const MainLayout: React.FC = () => {
@@ -51,6 +52,7 @@ const MainLayout: React.FC = () => {
         {/* Scrollable middle content */}
         <Box sx={{ flexGrow: 1, overflow: 'auto', padding: '2rem' }}>
           <Outlet context={{ projects, onEdit: handleEdit, onDelete: handleDelete }} />
+          <NotificationList/>
         </Box>
       </Box>
     </Box>

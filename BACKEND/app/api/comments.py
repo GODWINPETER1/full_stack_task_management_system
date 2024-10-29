@@ -24,7 +24,7 @@ async def create_comment(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Create the comment
-    db_comment = Comment(content=comment.content, task_id=task_id, user_id=current_user.id)
+    db_comment = Comment(content=comment.content, task_id=task_id, user_id=current_user.id , tagged_users = comment.tagged_users) 
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)  # Refresh the instance to get the new created_at value

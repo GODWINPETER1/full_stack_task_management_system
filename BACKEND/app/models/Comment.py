@@ -1,4 +1,4 @@
-from sqlalchemy import Column , Integer , String , ForeignKey , DateTime
+from sqlalchemy import Column , Integer , String , ForeignKey , DateTime , Text , ARRAY
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
@@ -16,3 +16,5 @@ class Comment(Base):
     # Relationship
     task = relationship("Task" , back_populates="comments")
     user = relationship("User" , back_populates="comments")
+    tagged_users = Column(ARRAY(Integer) , nullable=True)
+    

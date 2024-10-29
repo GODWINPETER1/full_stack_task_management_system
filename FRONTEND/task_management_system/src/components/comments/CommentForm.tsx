@@ -9,6 +9,7 @@ interface CommentFormProps {
 
 const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => {
   const [content, setContent] = useState('');
+  const [taggedUsers, setTaggedUsers] = useState<string>(''); // New state for tagged users
 
   const token = localStorage.getItem('accessToken');
 
@@ -18,18 +19,24 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
       console.error('No access token found');
       return; // Optionally handle the error for no token
     }
-    
+
+    const taggedUserIds = taggedUsers.split(',').map(userId => userId.trim()).filter(id => id); // Convert to array and trim
+
     try {
       await axios.post(`http://127.0.0.1:8000/api/v1/tasks/${taskId}/comments`, 
-        { content }, // Send the content in the request body
+        { 
+          content,
+          tagged_users: taggedUserIds // Include tagged users in the request body
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`, // Include the token in the headers
           },
         }
       );
-      
+
       setContent(''); // Clear the input field after submission
+      setTaggedUsers(''); // Clear the tagged users input
       onCommentAdded(); // Trigger refresh of comments
     } catch (error) {
       console.error('Failed to add comment:', error);
@@ -44,6 +51,14 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
         fullWidth
         value={content}
         onChange={(e) => setContent(e.target.value)}
+      />
+      <TextField
+        label="Tag Users (comma-separated IDs)"
+        variant="outlined"
+        fullWidth
+        value={taggedUsers}
+        onChange={(e) => setTaggedUsers(e.target.value)} // Handle tagged users input
+        sx={{ marginTop: 1 }} // Add margin for spacing
       />
       <Button type="submit" variant="contained" sx={{ marginTop: 1 }}>
         Submit
