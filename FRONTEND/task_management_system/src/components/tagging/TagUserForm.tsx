@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Autocomplete } from '@mui/material';
+import { TextField, Button, Autocomplete, List, ListItem, ListItemText, IconButton } from '@mui/material';
 import axios from 'axios';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface User {
   id: number;
@@ -10,9 +11,10 @@ interface User {
 interface TagUserFormProps {
   taskId: number;
   onTagAdded: () => void; // Callback to refresh tagged users
+  assignedUsers: User[]; // Pass currently assigned users to the component
 }
 
-const TagUserForm: React.FC<TagUserFormProps> = ({ taskId, onTagAdded }) => {
+const TagUserForm: React.FC<TagUserFormProps> = ({ taskId, onTagAdded, assignedUsers }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -31,27 +33,29 @@ const TagUserForm: React.FC<TagUserFormProps> = ({ taskId, onTagAdded }) => {
 
   const handleTagUser = async () => {
     if (selectedUser) {
-      const token = localStorage.getItem('accessToken'); // Get token from local storage
-      try {
-        await axios.post(
-          `http://127.0.0.1:8000/api/v1/tasks/${taskId}/tag`,
-          {
-            user_id: selectedUser.id, // Send user ID in the request body
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the token in the headers
-            },
-          }
-        );
-        onTagAdded(); // Refresh tagged users
-        setSelectedUser(null); // Clear the selection
-      } catch (error) {
-        console.error('Failed to tag user:', );
-      }
+        const token = localStorage.getItem('accessToken'); // Get token from local storage
+        try {
+            await axios.post(
+                `http://127.0.0.1:8000/api/v1/tasks/${taskId}/tag`,
+                {
+                    user_id: selectedUser.id, // Send user ID in the request body
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include the token in the headers
+                    },
+                }
+            );
+            onTagAdded(); // Refresh tagged users
+            setSelectedUser(null); // Clear the selection
+        } catch (error) {
+            console.error('Failed to tag user:', error);
+        }
     }
-  };
-  
+};
+
+
+ 
 
   return (
     <div>
@@ -67,6 +71,9 @@ const TagUserForm: React.FC<TagUserFormProps> = ({ taskId, onTagAdded }) => {
       <Button onClick={handleTagUser} variant="contained" color="primary" disabled={!selectedUser}>
         Tag User
       </Button>
+
+      {/* Display currently tagged users with an option to remove them */}
+      
     </div>
   );
 };

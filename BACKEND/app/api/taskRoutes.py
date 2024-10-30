@@ -4,6 +4,7 @@ from typing import List
 from app.schemas.task import TaskCreate, TaskUpdate, Task as TaskSchema
 from app.models.task import Task
 from app.models.project import Project
+from app.models.task_tag import TaskTag
 from app.models.user import User
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
@@ -35,16 +36,30 @@ def create_task_for_project(
 # Read all tasks for a project (Viewers, Editors, and Admins can view tasks)
 @router.get("/{project_id}/tasks", response_model=List[TaskSchema])
 def read_tasks_for_project(
-    project_id: int, 
+    project_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user), 
-    permission_check: bool = Depends(has_permission("view_task"))  # Restrict access by permission
+    current_user: User = Depends(get_current_user),
+    permission_check: bool = Depends(has_permission("view_task"))
 ):
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
-    return db.query(Task).filter(Task.project_id == project_id).all()
+
+    # Only return tasks assigned to or tagged for the current user within this project
+    tasks = (
+        db.query(Task)
+        .join(TaskTag, Task.id == TaskTag.task_id, isouter=True)  # Join TaskTag for tagged tasks
+        .filter(Task.project_id == project_id)
+        .filter(
+            (Task.assigned_to_id == current_user.id) |  # Assigned tasks
+            (TaskTag.user_id == current_user.id)         # Tagged tasks
+        )
+        .all()
+    )
+    return tasks
+
+
+
 
 # Update a task (Only Editors and Admins should be able to update tasks)
 @router.put("/tasks/{task_id}", response_model=TaskSchema)

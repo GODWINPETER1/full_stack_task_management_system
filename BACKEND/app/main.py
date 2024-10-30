@@ -10,6 +10,7 @@ from app.auth.oauth import router as oauth_router
 from app.api.tagging import router as tagging_outer
 from app.api.reminders import router as reminder_router
 from app.api.comments import router as comment_router
+from app.api.notifications import router as notifications_router
 from starlette.middleware.sessions import SessionMiddleware
 
 
@@ -42,3 +43,4 @@ app.include_router(analytics_task_router , prefix = "/api/v1/analytics")
 app.include_router(analytics_project_router , prefix = "/api/v1/analytics")
 app.include_router(reminder_router , prefix="/api/v1/reminders")
 app.include_router(tagging_outer , prefix="/api/v1")
+app.include_router(notifications_router , prefix="/api/v1")

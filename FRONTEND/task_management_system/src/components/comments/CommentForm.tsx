@@ -52,14 +52,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
-      <TextField
-        label="Tag Users (comma-separated IDs)"
-        variant="outlined"
-        fullWidth
-        value={taggedUsers}
-        onChange={(e) => setTaggedUsers(e.target.value)} // Handle tagged users input
-        sx={{ marginTop: 1 }} // Add margin for spacing
-      />
+      
       <Button type="submit" variant="contained" sx={{ marginTop: 1 }}>
         Submit
       </Button>

@@ -18,3 +18,4 @@ class User(Base):
     tasks_assigned = relationship("Task" , back_populates="assigned_to")
     comments = relationship("Comment" , back_populates="user")
     roles = relationship("UserRole" , back_populates="user")
+    notifications = relationship("Notification", back_populates="user")

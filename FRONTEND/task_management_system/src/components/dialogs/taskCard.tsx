@@ -111,6 +111,25 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     }
   };
 
+  const handleDeleteTag = async (userId: number) => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/tag/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Update state to remove the user from the assigned list
+      setAssignedUser(assignedUser.filter((user) => user.id !== userId));
+      setNotificationMessage('User tag removed successfully!');
+      setNotificationOpen(true);
+    } catch (error) {
+      console.error('Failed to remove tag');
+    }
+  };
+  
+
+
   const handleNotificationClose = () => setNotificationOpen(false);
 
   const handleTagUserAdded = () => {
@@ -205,15 +224,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
             ))}
           </List>
 
-          {/* Assigned Users */}
-          {assignedUser.length > 0 && (
+         {/* Assigned Users */}
+         {assignedUser.length > 0 && (
             <CardContent>
               <Typography variant="body1"><strong>{assignedUser.length} Members Assigned</strong></Typography>
               <List>
                 {assignedUser.map((user) => (
-                  <ListItem key={user.id}>
+                  <ListItem key={user.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Avatar style={{ marginRight: '10px' }}>{user.username[0]}</Avatar>
                     <ListItemText primary={user.username} />
+                    <IconButton onClick={() => handleDeleteTag(user.id)}>
+                      <DeleteIcon />
+                    </IconButton>
                   </ListItem>
                 ))}
               </List>
@@ -231,8 +253,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
           }} />
           <ReminderList taskId={task.id} />
 
-          {/* Tag User Form */}
-          <TagUserForm taskId={task.id} onTagAdded={handleTagUserAdded} />
+          
+          <TagUserForm taskId={task.id} onTagAdded={handleTagUserAdded} assignedUsers={assignedUser} />
+
+       
+
         </DialogContent>
 
         <DialogActions>

@@ -4,6 +4,8 @@ from typing import List
 from app.crud import project as crud_project
 from app.models.user import User
 from app.schemas.project import Project, ProjectCreate
+from app.models.task import Task
+from app.models.task_tag import TaskTag
 from app.api.dependencies import get_current_user
 from app.db.session import get_db
 
@@ -15,10 +17,25 @@ router = APIRouter()
 def create_project(project: ProjectCreate, current_user: User = Depends(get_current_user) , db: Session = Depends(get_db)):
     return crud_project.create_project(db=db, project=project , user_id = current_user.id)
 
-# Get all projects
+# Get all projects where the user is assigned to or tagged in at least one task
 @router.get("/", response_model=List[Project])
-def read_projects(skip: int = 0, limit: int = 10, current_user: User =(Depends(get_current_user))  , db: Session = Depends(get_db)):
-    return crud_project.get_projects(db=db, user_id=current_user.id , skip=skip, limit=limit)
+def read_projects(skip: int = 0, limit: int = 10, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Query projects where the user is either assigned or tagged in at least one task
+    projects = (
+        db.query(Project)
+        .join(Task, Project.id == Task.project_id)  # Join Project with Task
+        .outerjoin(TaskTag, Task.id == TaskTag.task_id)  # Join Task with TaskTag for tagged tasks
+        .filter(
+            (Task.assigned_to_id == current_user.id) |  # Assigned tasks
+            (TaskTag.user_id == current_user.id)         # Tagged tasks
+        )
+        .distinct()  # Ensure each project appears only once
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return projects
+
 
 # Get a project by ID
 @router.get("/{project_id}", response_model=Project)

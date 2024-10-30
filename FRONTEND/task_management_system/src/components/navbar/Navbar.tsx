@@ -1,10 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState , useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Button, Menu, MenuItem, Box, IconButton, Avatar, Tooltip } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
+import axios from 'axios';
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -14,6 +17,25 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const { username, email, logout, user, isAuthenticated } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const token = localStorage.getItem('accessToken');
+
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        
+        const response = await axios.get('http://127.0.0.1:8000/api/v1/notifications', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,6 +54,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     return <div>Loading...</div>;
   }
 
+  
+
   return (
     <AppBar position="static" color="transparent" sx={{ boxShadow: 'none', borderBottom: '1px solid #e0e0e0' }}>
       <Toolbar>
@@ -48,6 +72,13 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           Task Management System
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Notification Icon with Badge */}
+          <IconButton color="inherit" sx={{ marginRight: 2 }}>
+            <Badge badgeContent={notifications.length} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          
           <Button
             aria-controls="simple-menu"
             aria-haspopup="true"
