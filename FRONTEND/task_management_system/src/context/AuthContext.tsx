@@ -1,6 +1,10 @@
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react'; 
 import axios from 'axios';
+import { PublicClientApplication, AuthenticationResult, BrowserAuthError} from "@azure/msal-browser";
+import { msalConfig, loginRequest } from "../microsoftConfig";
 
+
+const msalInstance = new PublicClientApplication(msalConfig);
 // Define the type for the context
 interface User {
   email: string;
@@ -13,6 +17,7 @@ interface AuthContextType {
   username: string;
   email: string;
   userId: number | null;
+  setUser: (user: User | null) => void;
   role: string | null; // Add role to context
   user: User | null; // User information for Google or Slack login
   setUsername: (username: string) => void;
@@ -33,6 +38,9 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [role, setRole] = useState<string | null>(null); // Role state
   const [user, setUser] = useState<User | null>(null);
+
+
+
 
   const register = async (username: string, email: string, password: string) => {
     try {
@@ -70,6 +78,14 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     localStorage.setItem("isAuthenticated" , "true")
   };
 
+
+  
+
+  
+
+
+  
+
   const logout = () => {
     setIsAuthenticated(false);
     setUsername('');
@@ -98,7 +114,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername, setEmail, register, login, googleLogin, logout, user, userId, role }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, email, setUsername, setEmail, register, login, googleLogin, logout, user, userId, role , setUser}}>
       {children}
     </AuthContext.Provider>
   );

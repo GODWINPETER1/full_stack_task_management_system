@@ -19,3 +19,4 @@ class Task(Base):
     reminders = relationship("Reminder", back_populates="task")
     
     tags = relationship("TaskTag", back_populates="task")
+    time_logs = relationship("TimeLog" , back_populates="task")

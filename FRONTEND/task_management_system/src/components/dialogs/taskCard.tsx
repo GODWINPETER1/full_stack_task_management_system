@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Card, CardContent, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, List, ListItem, ListItemText, ButtonBase, Menu, MenuItem, 
-  Typography, Avatar, Slide
+  Typography, Avatar, Slide , Box , Divider
 } from '@mui/material';
 import CommentForm from '../comments/CommentForm'; // Importing CommentForm
 import CommentList from '../comments/CommentList'; // Importing CommentList
@@ -17,6 +17,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { TransitionProps } from '@mui/material/transitions';
+import TaskTimer from '../timer/TaskTimer';
+import TaskDetails from '../timer/TaskDetails';
 
 // Transition for dialogs
 const Transition = React.forwardRef(function Transition(
@@ -52,6 +54,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
   const [comments, setComments] = useState([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [showDetails , setShowDetails] = useState(false)
 
   const token = localStorage.getItem('accessToken');
 
@@ -186,79 +189,109 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
         </DialogTitle>
 
         <DialogContent>
-          <Typography paragraph>
-            Set permissions and invite users to manage this task.
-          </Typography>
+          {/* Task Information */}
+          <Box marginBottom={2}>
+            <Typography variant="subtitle1" fontWeight="bold">{task.title}</Typography>
+            <Typography variant="body2" color="textSecondary">{task.description}</Typography>
+          </Box>
+
+          <Divider />
+
+          {/* Time Tracking Section */}
+          <Box marginBottom={2} marginTop={2}>
+            <Typography variant="subtitle1" fontWeight="bold">Time Tracking</Typography>
+            <TaskTimer taskId={task.id} />
+            <TaskDetails taskId={task.id} />
+          </Box>
+
+          <Divider />
 
           {/* User Assignment/Search */}
-          <TextField
-            label="Search Users"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            fullWidth
-            margin="dense"
-            placeholder="Invite by name or email"
-          />
+          <Box marginBottom={2} marginTop={2}>
+            <Typography variant="subtitle1" fontWeight="bold">Assign Users</Typography>
+            <TextField
+              label="Search Users"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              fullWidth
+              margin="dense"
+              placeholder="Invite by name or email"
+            />
+            <List>
+              {filteredUsers.map((user) => (
+                <ButtonBase
+                  key={user.id}
+                  onClick={() => setAssignedUser([...assignedUser, user])}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    backgroundColor: '#f0f4ff',
+                    marginBottom: '5px',
+                  }}
+                >
+                  <ListItem component="li" style={{ width: '100%' }}>
+                    <Avatar style={{ marginRight: '10px' }}>{user.username[0]}</Avatar>
+                    <ListItemText primary={user.username} secondary={user.email} />
+                  </ListItem>
+                </ButtonBase>
+              ))}
+            </List>
+          </Box>
 
-          {/* List of filtered users */}
-          <List>
-            {filteredUsers.map((user) => (
-              <ButtonBase
-                key={user.id}
-                onClick={() => handleInviteUser(user)}
-                style={{
-                  width: '100%', 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  padding: '10px',
-                  borderRadius: '8px',
-                  backgroundColor: assignedUser.some(u => u.id === user.id) ? '#f0f4ff' : 'transparent',
-                  transition: 'background-color 0.3s'
-                }}
-              >
-                <ListItem component="li" style={{ width: '100%' }}>
-                  <Avatar style={{ marginRight: '10px' }}>{user.username[0]}</Avatar>
-                  <ListItemText primary={user.username} secondary={user.email} />
-                </ListItem>
-              </ButtonBase>
-            ))}
-          </List>
-
-         {/* Assigned Users */}
-         {assignedUser.length > 0 && (
-            <CardContent>
-              <Typography variant="body1"><strong>{assignedUser.length} Members Assigned</strong></Typography>
+          {/* Assigned Users */}
+          {assignedUser.length > 0 && (
+            <Box marginBottom={2}>
+              <Typography variant="body1" fontWeight="bold">{assignedUser.length} Members Assigned</Typography>
               <List>
                 {assignedUser.map((user) => (
-                  <ListItem key={user.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <ListItem
+                    key={user.id}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
                     <Avatar style={{ marginRight: '10px' }}>{user.username[0]}</Avatar>
                     <ListItemText primary={user.username} />
-                    <IconButton onClick={() => handleDeleteTag(user.id)}>
+                    <IconButton onClick={() => setAssignedUser(assignedUser.filter(u => u.id !== user.id))}>
                       <DeleteIcon />
                     </IconButton>
                   </ListItem>
                 ))}
               </List>
-            </CardContent>
+            </Box>
           )}
 
+          <Divider />
+
           {/* Comment Section */}
-          <CommentForm taskId={task.id} onCommentAdded={fetchComments} />
-          <CommentList comments={comments} />
+          <Box marginTop={2}>
+            <Typography variant="subtitle1" fontWeight="bold">Comments</Typography>
+            <CommentForm taskId={task.id} onCommentAdded={() => setComments([...comments])} />
+            <CommentList comments={comments} />
+          </Box>
 
-          {/* Reminder content */}
-          <ReminderForm taskId={task.id} onReminderAdded={() => {
-            setNotificationMessage('Reminder added successfully!');
-            setNotificationOpen(true);
-          }} />
-          <ReminderList taskId={task.id} />
+          <Divider />
 
-          
-          <TagUserForm taskId={task.id} onTagAdded={handleTagUserAdded} assignedUsers={assignedUser} />
+          {/* Reminder Section */}
+          <Box marginTop={2}>
+            <Typography variant="subtitle1" fontWeight="bold">Reminders</Typography>
+            <ReminderForm taskId={task.id} onReminderAdded={() => {setNotificationMessage('Reminder Added Successfully'); setNotificationOpen(true)}} />
+            <ReminderList taskId={task.id} />
+          </Box>
 
-       
+          <Divider />
+
+          {/* Tagging Section */}
+          <Box marginTop={2}>
+            <Typography variant="subtitle1" fontWeight="bold">Tag Users</Typography>
+            <TagUserForm taskId={task.id} onTagAdded={() => setNotificationMessage('User tagged successfully!')} assignedUsers={assignedUser} />
+          </Box>
 
         </DialogContent>
+
+
+        
 
         <DialogActions>
           <Button onClick={() => onDelete(task.id)} color="secondary" startIcon={<DeleteIcon />}>
