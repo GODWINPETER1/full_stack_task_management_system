@@ -9,7 +9,7 @@ const Header: React.FC = () => {
     <div className='header-container'>
         <Toolbar>
         <Typography variant="h5" style={{ flexGrow: 1 , color: '#000'  , fontWeight: 600}}>
-          Godwin Peter
+          Bakley Bosco 
         </Typography>
         <Button  style={{ backgroundColor: '#9ACD32' , color: '#000'}}  onClick={() => navigate('/register')}>
           Get Qoute 
