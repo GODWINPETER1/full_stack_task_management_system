@@ -1,11 +1,9 @@
 import React from 'react'
 
-const LoginForm = () => {
+export default function Members() {
   return (
     <div>
-       Hi
+       Members
     </div>
   )
 }
-
-export default LoginForm

@@ -1,11 +1,11 @@
 import React from 'react'
 
-function LoginPage() {
+function TagUserList() {
   return (
     <div>
-       yoo
+       Hey
     </div>
   )
 }
 
-export default LoginPage
+export default TagUserList
