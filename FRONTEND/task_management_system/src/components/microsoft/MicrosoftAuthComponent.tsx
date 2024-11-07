@@ -12,24 +12,35 @@ const MicrosoftAuthComponent: React.FC = () => {
   const { setEmail, setUser } = useAuth();
 
   const handleMicrosoftLogin = async () => {
-    try {
-      const response = await instance.loginPopup(loginRequest);
-      const account = response.account;
-      if (account) {
-        setEmail(account.username);
-        setUser({
-          email: account.username,
-          picture: "", // Microsoft doesn't provide a picture URL by default
-          name: account.name || "Unknown User",
-        });
+    // Example: Send accessToken to backend
+try {
+  const response = await instance.loginPopup(loginRequest);
+  const account = response.account;
+  if (account) {
+    setEmail(account.username);
+    setUser({
+      email: account.username,
+      picture: "",
+      name: account.name || "Unknown User",
+    });
 
-        // Access token can be sent to your backend if needed
-        const accessToken = response.accessToken;
-        console.log("Access Token:", accessToken);
-      }
-    } catch (error) {
-      console.error("Authentication error:", error);
-    }
+    // Send accessToken to backend
+    const accessToken = response.accessToken;
+    console.log("Access Token:", accessToken);
+    
+    await fetch("http://localhost:8000/api/v1/auth/microsoft/callback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ accessToken }),
+    });
+  }
+} catch (error) {
+  console.error("Authentication error:", error);
+}
+
   };
 
   return (

@@ -1,11 +1,13 @@
 // src/redux/taskSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   description?: string;
-  status: string;  // e.g., 'To Do', 'Doing', 'Done'
+  status: string;
+  due_date: string | null; // Add due_date to the interface
+  priority: string;
 }
 
 interface TaskState {

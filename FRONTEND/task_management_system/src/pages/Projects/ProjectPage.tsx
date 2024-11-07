@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { addTask, setTasks, updateTask, deleteTask } from '../../redux/taskSlice';
-import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle , Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import TaskCard from '../../components/dialogs/taskCard';
@@ -18,6 +18,7 @@ interface Task {
   description?: string;
   status: string;
   due_date: string | null;
+  priority: string
 }
 
 const ProjectPage: React.FC = () => {
@@ -30,6 +31,7 @@ const ProjectPage: React.FC = () => {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState<string | null>(null);
   const [open, setOpen] = useState(false);  // Dialog open/close state
+  const [newTaskPriority, setNewTaskPriority] = useState('Medium'); // Add state for priority
 
   const token = localStorage.getItem('accessToken')
   
@@ -37,47 +39,61 @@ const ProjectPage: React.FC = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks` , {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
         );
-        dispatch(setTasks(response.data));
+  
+        // Add a default priority if it's missing
+        const tasksWithPriority = response.data.map((task: Task) => ({
+          ...task,
+          priority: task.priority || "Medium", // Default to "Medium" if priority is missing
+        }));
+  
+        dispatch(setTasks(tasksWithPriority));
+       
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
     };
     fetchTasks();
-  }, [projectId, dispatch , token]);
+  }, [projectId, dispatch, token]);
+  
 
   const handleCreateTask = async () => {
     const newTask = {
       title: newTaskTitle,
       description: newTaskDescription,
-      status: 'To Do',
+      status: "To Do",
       due_date: newTaskDueDate || null,
+      priority: newTaskPriority, // Include the priority field
     };
-
+  
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/api/v1/projects/${projectId}/tasks`,
         newTask,
         {
           headers: {
-            Authorization: `Bearer ${token}`,  // Add the token to the headers
+            Authorization: `Bearer ${token}`,
           },
         }
       );
       dispatch(addTask(response.data));
-      setNewTaskTitle('');
-      setNewTaskDescription('');
+      setNewTaskTitle("");
+      setNewTaskDescription("");
       setNewTaskDueDate(null);
-      setOpen(false);  // Close the dialog after task creation
+      setNewTaskPriority("Medium"); // Reset priority
+      setOpen(false); // Close the dialog
     } catch (error) {
       console.error("Error creating task:", error);
     }
   };
+  
 
   const handleUpdateTask = async (id: number, status: string) => {
     const updatedTask = tasks.find((task) => task.id === id);
@@ -180,7 +196,7 @@ const ProjectPage: React.FC = () => {
                         marginBottom: '8px', // Reduce space between task cards
                       }}
                     >
-                      <TaskCard  task={task} onDelete={handleDeleteTask} />
+                      <TaskCard key={task.id}  task={task} onDelete={handleDeleteTask} />
                     </div>
                   )}
                 </Draggable>
@@ -229,6 +245,19 @@ const ProjectPage: React.FC = () => {
             onChange={(e) => setNewTaskDueDate(e.target.value)}
             margin="dense"
           />
+          <FormControl fullWidth margin="dense"> {/* Add this block */}
+    <InputLabel>Priority</InputLabel>
+    <Select
+      value={newTaskPriority}
+      onChange={(e) => setNewTaskPriority(e.target.value)}
+      label="Priority"
+    >
+      <MenuItem value="Low">Low</MenuItem>
+      <MenuItem value="Medium">Medium</MenuItem>
+      <MenuItem value="High">High</MenuItem>
+      <MenuItem value="Critical">Critical</MenuItem>
+    </Select>
+  </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)} color="secondary">Cancel</Button>

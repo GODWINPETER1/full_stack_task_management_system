@@ -1,18 +1,20 @@
+// src/components/TaskTimer.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Typography, Box } from '@mui/material';
+import { Button, Typography, Box, CircularProgress } from '@mui/material';
 
 interface TaskTimerProps {
   taskId: number;
 }
 
-const TaskTimer: React.FC<TaskTimerProps> = ({ taskId}) => {
+const TaskTimer: React.FC<TaskTimerProps> = ({ taskId }) => {
   const [timerRunning, setTimerRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
-  const [elapsedTime, setElapsedTime] = useState(0); // Track in seconds
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [intervalId, setIntervalId] = useState<number | null>(null);
 
-  const token = localStorage.getItem("accessToken")
+  const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
     if (timerRunning && startTime) {
@@ -37,15 +39,12 @@ const TaskTimer: React.FC<TaskTimerProps> = ({ taskId}) => {
   };
 
   const handleStartTimer = async () => {
+    setLoading(true);
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/api/v1/tasks/${taskId}/start_timer`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {
         setTimerRunning(true);
@@ -53,22 +52,19 @@ const TaskTimer: React.FC<TaskTimerProps> = ({ taskId}) => {
         setElapsedTime(0);
       }
     } catch (error) {
-      console.error("Failed to start timer", error);
+      console.error('Failed to start timer', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleStopTimer = async () => {
+    setLoading(true);
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/api/v1/tasks/${taskId}/stop_timer`,
-        {
-          duration: elapsedTime,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { duration: elapsedTime },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {
         setTimerRunning(false);
@@ -76,14 +72,18 @@ const TaskTimer: React.FC<TaskTimerProps> = ({ taskId}) => {
         setElapsedTime(0);
       }
     } catch (error) {
-      console.error("Failed to stop timer", error);
+      console.error('Failed to stop timer', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
-      <Typography variant="h6">{formatTime(elapsedTime)}</Typography>
-      {timerRunning ? (
+      <Typography variant="h5">{formatTime(elapsedTime)}</Typography>
+      {loading ? (
+        <CircularProgress />
+      ) : timerRunning ? (
         <Button variant="contained" color="secondary" onClick={handleStopTimer}>
           Stop Timer
         </Button>

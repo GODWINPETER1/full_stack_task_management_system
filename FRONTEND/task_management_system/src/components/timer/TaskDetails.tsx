@@ -1,5 +1,7 @@
+// src/components/TaskDetails.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface TimeLog {
   id: number;
@@ -21,35 +23,48 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId }) => {
   useEffect(() => {
     const fetchTimeLogs = async () => {
       try {
-        const response = await axios.get<TimeLog[]>(`http://127.0.0.1:8000/api/v1/tasks/${taskId}/time_logs`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get<TimeLog[]>(
+          `http://127.0.0.1:8000/api/v1/tasks/${taskId}/time_logs`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         setTimeLogs(response.data);
       } catch (error) {
         console.error('Failed to fetch time logs', error);
       }
     };
-
     fetchTimeLogs();
   }, [taskId, token]);
 
   const totalDuration = timeLogs.reduce((sum, log) => sum + log.duration, 0);
 
   return (
-    <div>
+    <TableContainer component={Paper}>
       <h3>
         Total Time Spent: {Math.floor(totalDuration / 3600)}:
         {Math.floor((totalDuration % 3600) / 60).toString().padStart(2, '0')}:
         {(totalDuration % 60).toString().padStart(2, '0')}
       </h3>
-      <ul>
-        {timeLogs.map((log) => (
-          <li key={log.id}>
-            Start: {new Date(log.start_time).toLocaleString()}, End: {log.end_time ? new Date(log.end_time).toLocaleString() : 'In Progress'}
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Start Time</TableCell>
+            <TableCell>End Time</TableCell>
+            <TableCell>Duration (s)</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {timeLogs.map((log) => (
+            <TableRow key={log.id}>
+              <TableCell>{new Date(log.start_time).toLocaleString()}</TableCell>
+              <TableCell>
+                {log.end_time ? new Date(log.end_time).toLocaleString() : 'In Progress'}
+              </TableCell>
+              <TableCell>{log.duration}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
-import { List, ListItemText, Divider, ListItemButton, ListItemIcon, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Select, MenuItem } from '@mui/material';
+import {
+  List,
+  ListItemText,
+  Divider,
+  ListItemButton,
+  ListItemIcon,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import EventNoteIcon from '@mui/icons-material/EventNote';
@@ -28,12 +43,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
   };
 
   return (
-    <div style={{ width: isCollapsed ? '80px' : '250px', backgroundColor: '#F4F5F7', height: '100vh', padding: '1rem', transition: 'width 0.3s ease' }}>
-      <h3 style={{ fontWeight: 'bold', marginBottom: '1rem', display: isCollapsed ? 'none' : 'block' }}>Menu</h3>
+    <div
+      style={{
+        width: isCollapsed ? '80px' : '250px',
+        backgroundColor: '#F4F5F7',
+        height: '100vh',
+        padding: '1rem',
+        transition: 'width 0.3s ease',
+      }}
+    >
+      <h3
+        style={{
+          fontWeight: 'bold',
+          marginBottom: '1rem',
+          display: isCollapsed ? 'none' : 'block',
+        }}
+      >
+        Menu
+      </h3>
       <List>
-
-         {/* Projects Menu */}
-         <ListItemButton onClick={() => navigate('/dashboard/overview')}>
+        <ListItemButton onClick={() => navigate('/dashboard/overview')}>
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
@@ -41,8 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
         </ListItemButton>
         <Divider />
 
-
-        {/* Projects Menu */}
         <ListItemButton onClick={() => navigate('/dashboard/projects')}>
           <ListItemIcon>
             <AccountTree />
@@ -51,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
         </ListItemButton>
         <Divider />
 
-        {/* Other Menus */}
         <ListItemButton onClick={() => navigate('/dashboard/members')}>
           <ListItemIcon>
             <PeopleIcon />
@@ -60,13 +86,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
         </ListItemButton>
         <Divider />
 
-        <ListItemButton onClick={() => navigate('/dashboard/agenda')}>
-          <ListItemIcon>
-            <EventNoteIcon />
-          </ListItemIcon>
-          <ListItemText primary="Agenda" sx={{ display: isCollapsed ? 'none' : 'block' }} />
-        </ListItemButton>
-        <Divider />
+        {/* Loop through projects to create an Agenda button for each */}
+        {projects.map((project) => (
+          <div key={project.id}>
+            <ListItemButton onClick={() => navigate(`/dashboard/agenda/${project.id}`)}>
+              <ListItemIcon>
+                <EventNoteIcon />
+              </ListItemIcon>
+              <ListItemText primary="Calendar" sx={{ display: isCollapsed ? 'none' : 'block' }} />
+            </ListItemButton>
+            <Divider />
+          </div>
+        ))}
 
         <ListItemButton onClick={() => navigate('/dashboard/reports')}>
           <ListItemIcon>
@@ -78,7 +109,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, projects }) => {
 
       <Divider sx={{ margin: '1rem 0' }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1rem',
+        }}
+      >
         <h3 style={{ fontWeight: 'bold', display: isCollapsed ? 'none' : 'block' }}>Your Projects</h3>
         <div>
           <IconButton onClick={() => console.log('Sort Projects')}>

@@ -1,17 +1,36 @@
 import React from 'react';
-import Comment from './Comment';
+import { List, ListItem, ListItemText, Avatar, Box, Typography } from '@mui/material';
+
+interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user?: {
+    username: string;
+    avatar?: string; // URL to avatar image, optional
+  };
+}
 
 interface CommentListProps {
-  comments: { id: number; content: string; created_at: string }[];
+  comments: Comment[];
 }
 
 const CommentList: React.FC<CommentListProps> = ({ comments }) => {
   return (
-    <div>
-      {comments.map(comment => (
-        <Comment key={comment.id} content={comment.content} createdAt={comment.created_at} />
+    <List>
+      {comments.map((comment) => (
+        <ListItem key={comment.id} alignItems="flex-start">
+          <Avatar alt={comment.user?.username || 'User'} src={comment.user?.avatar || ''} />
+          <Box marginLeft={2}>
+            <Typography variant="body1">{comment.user?.username || 'Unknown User'}</Typography>
+            <Typography variant="body2" color="textSecondary">
+              {new Date(comment.created_at).toLocaleString()}
+            </Typography>
+            <Typography variant="body2">{comment.content}</Typography>
+          </Box>
+        </ListItem>
       ))}
-    </div>
+    </List>
   );
 };
 

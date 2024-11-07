@@ -9,34 +9,22 @@ interface CommentFormProps {
 
 const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => {
   const [content, setContent] = useState('');
-  const [taggedUsers, setTaggedUsers] = useState<string>(''); // New state for tagged users
-
   const token = localStorage.getItem('accessToken');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!token) {
       console.error('No access token found');
-      return; // Optionally handle the error for no token
+      return;
     }
 
-    const taggedUserIds = taggedUsers.split(',').map(userId => userId.trim()).filter(id => id); // Convert to array and trim
-
     try {
-      await axios.post(`http://127.0.0.1:8000/api/v1/tasks/${taskId}/comments`, 
-        { 
-          content,
-          tagged_users: taggedUserIds // Include tagged users in the request body
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the headers
-          },
-        }
+      await axios.post(
+        `http://127.0.0.1:8000/api/v1/tasks/${taskId}/comments`,
+        { content },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setContent(''); // Clear the input field after submission
-      setTaggedUsers(''); // Clear the tagged users input
       onCommentAdded(); // Trigger refresh of comments
     } catch (error) {
       console.error('Failed to add comment:', error);
@@ -52,7 +40,6 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
-      
       <Button type="submit" variant="contained" sx={{ marginTop: 1 }}>
         Submit
       </Button>

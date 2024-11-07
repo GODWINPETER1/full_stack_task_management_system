@@ -1,32 +1,28 @@
 // src/components/tasks/TaskCard.tsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Card, CardContent, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, List, ListItem, ListItemText, ButtonBase, Menu, MenuItem, 
-  Typography, Avatar, Slide , Box , Divider
+  Card, CardContent, IconButton, Dialog, DialogContent, ButtonBase, Typography, Avatar, Box, Divider, TextField, List, ListItem, ListItemText
 } from '@mui/material';
-import CommentForm from '../comments/CommentForm'; // Importing CommentForm
-import CommentList from '../comments/CommentList'; // Importing CommentList
-import ReminderForm from '../reminders/ReminderForm';
-import ReminderList from '../reminders/ReminderList';
-import Notification from '../notifications/Notification'; // Importing Notification component
-import TagUserForm from '../tagging/TagUserForm'; // Importing TagUserForm
+import CommentForm from '../comments/CommentForm';
+import CommentList from '../comments/CommentList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CancelIcon from '@mui/icons-material/Cancel';
+import LabelIcon from '@mui/icons-material/Label';
+import LabelDialog from '../../components/label/LabelDialog';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LinkIcon from '@mui/icons-material/Link';
+import TagIcon from '@mui/icons-material/Tag';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { TransitionProps } from '@mui/material/transitions';
-import TaskTimer from '../timer/TaskTimer';
-import TaskDetails from '../timer/TaskDetails';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-// Transition for dialogs
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement<any, any> },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+
+
+interface Label {
+  id: number;
+  name: string;
+  color: string;
+}
 
 interface User {
   id: number;
@@ -38,44 +34,108 @@ interface TaskCardProps {
   task: {
     id: number;
     title: string;
-    description?: string; // Ensure description is a required string
-    assigned_to_id?: number | null;
+    description?: string;
   };
   onDelete: (id: number) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
-  
   const [openDialog, setOpenDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [openLabelDialog, setOpenLabelDialog] = useState(false);
+  const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
   const [assignedUser, setAssignedUser] = useState<User[]>([]);
   const [comments, setComments] = useState([]);
-  const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [showDetails , setShowDetails] = useState(false)
-
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isWatching , setIsWatching] = useState(false);
   const token = localStorage.getItem('accessToken');
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-    fetchComments(); // Fetch comments when dialog opens
-  };
-  
-  const handleCloseDialog = () => setOpenDialog(false);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+  
+    // fetch initital watch status
+    useEffect(() => {
+
+      const checkIfWatching = async () => {
+
+        try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/is_watching` , {
+
+        headers: {Authorization: `Bearer ${token}`}
+      });
+      setIsWatching(response.data.is_watching)
+        } catch (error) {
+          console.log('failed to fetch watch status' , error)
+        }
+
+      }
+      checkIfWatching()
+    } , [task.id , token])
+
+    // Toggle watching status
+    const toggleWatching = async () => {
+      try {
+        if (isWatching) {
+          await axios.delete(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/watch`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setIsWatching(false);  // Successfully stopped watching
+        } else {
+          await axios.post(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/watch`, {}, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setIsWatching(true);  // Successfully started watching
+        }
+      } catch (error) {
+        console.error('Failed to toggle watch status:', error);
+      }
+    };
+    
+
+  useEffect(() => {
+    const fetchLabels = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/v1/projects/tasks/${task.id}/labels`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSelectedLabels(response.data);
+      } catch (error) {
+        console.error('Failed to fetch labels:', error);
+      }
+    };
+
+    fetchLabels();
+  }, [task.id, token]);
+
+  const handleOpenDialog = () => setOpenDialog(true);
+  const handleCloseDialog = () => setOpenDialog(false);
+  const handleOpenLabelDialog = () => setOpenLabelDialog(true);
+  const handleCloseLabelDialog = () => setOpenLabelDialog(false);
+
+  const handleLabelChange = (labels: Label[]) => {
+    setSelectedLabels(labels);
+  };
+
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/comments`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setComments(response.data);
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchComments()
+  } , [task.id])
 
   useEffect(() => {
     const searchUsers = async (query: string) => {
       if (query.length > 0) {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/?search=${query}` , {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
+          const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/?search=${query}`, {
+            headers: { Authorization: `Bearer ${token}` },
           });
           setFilteredUsers(response.data);
         } catch (error) {
@@ -86,6 +146,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
       }
     };
 
+
     const delayDebounceFn = setTimeout(() => {
       searchUsers(searchTerm);
     }, 100);
@@ -93,65 +154,43 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, token]);
 
-  const handleInviteUser = (user: User) => {
-    if (!assignedUser.some((invited) => invited.id === user.id)) {
-      setAssignedUser([...assignedUser, user]);
-    }
-    setSearchTerm(''); // Clear search term
-    setFilteredUsers([]);
-  };
-
-  const fetchComments = async () => {
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/comments` , {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setComments(response.data);
-    } catch (error) {
-      console.error('Failed to fetch comments:', error);
-    }
-  };
-
-  const handleDeleteTag = async (userId: number) => {
-    const token = localStorage.getItem('accessToken');
-    try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/tag/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      // Update state to remove the user from the assigned list
-      setAssignedUser(assignedUser.filter((user) => user.id !== userId));
-      setNotificationMessage('User tag removed successfully!');
-      setNotificationOpen(true);
-    } catch (error) {
-      console.error('Failed to remove tag');
-    }
-  };
-  
-
-
-  const handleNotificationClose = () => setNotificationOpen(false);
-
-  const handleTagUserAdded = () => {
-    setNotificationMessage('User tagged successfully!');
-    setNotificationOpen(true);
-  };
-
   return (
     <>
       <Card style={{ position: 'relative', borderRadius: '12px', marginBottom: '15px' }}>
         <CardContent>
+        <Box display="flex" flexWrap="wrap" marginTop={1}>
+            {selectedLabels.map((label) => (
+              <Box
+                key={label.id}
+                style={{
+                  backgroundColor: label.color,
+                  color: 'white',
+                  borderRadius: '4px',
+                  padding: '5px 10px',
+                  margin: '2px',
+                  fontSize: '0.75rem',
+                }}
+              >
+              </Box>
+            ))}
+          </Box>
           <Typography variant="h6" gutterBottom>{task.title}</Typography>
-          <Typography variant="body2" color="textSecondary">{task.description}</Typography>
+          {/* <Typography variant="body2" color="textSecondary">{task.description}</Typography> */}
+
+          {/* Display selected labels as colored tags */}
+          
+
           <IconButton
             style={{ position: 'absolute', top: 5, right: 5 }}
             onClick={handleOpenDialog}
           >
             <MoreVertIcon />
           </IconButton>
+          {
+            isWatching && (
+              <VisibilityIcon style={{ color: '#44546f', position: 'absolute', bottom: 10, left: 20 , fontSize: '20px' ,  }}/>
+            )
+          }
         </CardContent>
       </Card>
 
@@ -159,55 +198,20 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
         open={openDialog}
         onClose={handleCloseDialog}
         fullWidth
-        TransitionComponent={Transition}
+        maxWidth="md"
         PaperProps={{
-          style: {
-            borderRadius: '15px',
-          }
+          style: { display: 'flex', flexDirection: 'row', borderRadius: '15px' },
         }}
       >
-        <DialogTitle>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">Assign Task</Typography>
-            <div>
-              <IconButton onClick={handleMenuOpen}>
-                <MoreHorizIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={handleMenuClose}>Archive Task</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Duplicate Task</MenuItem>
-              </Menu>
-              <IconButton onClick={handleCloseDialog}>
-                <CancelIcon />
-              </IconButton>
-            </div>
-          </div>
-        </DialogTitle>
-
-        <DialogContent>
-          {/* Task Information */}
+        {/* Left Side: Task Details */}
+        <DialogContent style={{ flex: 2, paddingRight: '10px' }}>
           <Box marginBottom={2}>
-            <Typography variant="subtitle1" fontWeight="bold">{task.title}</Typography>
+            <Typography variant="h6">{task.title}</Typography>
             <Typography variant="body2" color="textSecondary">{task.description}</Typography>
           </Box>
 
-          <Divider />
-
-          {/* Time Tracking Section */}
-          <Box marginBottom={2} marginTop={2}>
-            <Typography variant="subtitle1" fontWeight="bold">Time Tracking</Typography>
-            <TaskTimer taskId={task.id} />
-            <TaskDetails taskId={task.id} />
-          </Box>
-
-          <Divider />
-
           {/* User Assignment/Search */}
-          <Box marginBottom={2} marginTop={2}>
+          <Box marginBottom={2}>
             <Typography variant="subtitle1" fontWeight="bold">Assign Users</Typography>
             <TextField
               label="Search Users"
@@ -264,46 +268,66 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
 
           <Divider />
 
-          {/* Comment Section */}
+          {/* Comments Section */}
           <Box marginTop={2}>
             <Typography variant="subtitle1" fontWeight="bold">Comments</Typography>
             <CommentForm taskId={task.id} onCommentAdded={() => setComments([...comments])} />
             <CommentList comments={comments} />
           </Box>
-
-          <Divider />
-
-          {/* Reminder Section */}
-          <Box marginTop={2}>
-            <Typography variant="subtitle1" fontWeight="bold">Reminders</Typography>
-            <ReminderForm taskId={task.id} onReminderAdded={() => {setNotificationMessage('Reminder Added Successfully'); setNotificationOpen(true)}} />
-            <ReminderList taskId={task.id} />
-          </Box>
-
-          <Divider />
-
-          {/* Tagging Section */}
-          <Box marginTop={2}>
-            <Typography variant="subtitle1" fontWeight="bold">Tag Users</Typography>
-            <TagUserForm taskId={task.id} onTagAdded={() => setNotificationMessage('User tagged successfully!')} assignedUsers={assignedUser} />
-          </Box>
-
         </DialogContent>
+<Box
+  style={{
+    flex: 1,
+    backgroundColor: '#091e420f',
+    color: 'white',
+    padding: '15px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  }}
+>
+  {/* Action Items with Icons */}
+  {[{
+    label: isWatching ? 'Watching' : 'Watch', // Change label based on isWatching
+    icon: isWatching ? <VisibilityOff /> : <Visibility />, // Change icon based on isWatching
+    action: toggleWatching
+  },
+    { label: 'Labels', icon: <LabelIcon />, action: handleOpenLabelDialog },
+    { label: 'Relations', icon: <LinkIcon /> },
+    { label: 'Tags', icon: <TagIcon /> },
+    { label: 'Attachments', icon: <AttachFileIcon /> },
+    { label: 'Location', icon: <AttachFileIcon /> }
+  ].map((item) => (
+    <ButtonBase
+      key={item.label}
+      style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: '4px',
+        backgroundColor: '#3d474d',
+        color: 'white',
+        marginTop: '10px',
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'start',
+      }}
+      onClick={item.action ? item.action : () => console.log(`Clicked ${item.label}`)}
+    >
+      <Box style={{ marginRight: '10px' }}>{item.icon}</Box>
+      {item.label}
+    </ButtonBase>
+  ))}
+</Box>
 
-
-        
-
-        <DialogActions>
-          <Button onClick={() => onDelete(task.id)} color="secondary" startIcon={<DeleteIcon />}>
-            Delete Task
-          </Button>
-        </DialogActions>
       </Dialog>
 
-      <Notification
-        open={notificationOpen}
-        message={notificationMessage}
-        onClose={handleNotificationClose}
+      <LabelDialog
+        open={openLabelDialog}
+        onClose={handleCloseLabelDialog}
+        taskId={task.id}
+        selectedLabels={selectedLabels}
+        onLabelChange={handleLabelChange}
       />
     </>
   );

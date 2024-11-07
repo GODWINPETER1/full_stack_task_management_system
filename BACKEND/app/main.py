@@ -12,6 +12,8 @@ from app.api.reminders import router as reminder_router
 from app.api.comments import router as comment_router
 from app.api.notifications import router as notifications_router
 from app.api.time_tracking import router as time_tracking_router
+from app.api.label_routes import router as label_router
+from app.api.watcherRouter import router as task_watcher
 from app.auth.azure_auth import  azure_router
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -31,7 +33,6 @@ app.add_middleware(
 )
 
 # Configure the session middleware with a secret key
-app.add_middleware(SessionMiddleware, secret_key="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")
 app.add_middleware(SessionMiddleware, secret_key="fea8687e-70cc-49fb-bdff-1d4e4747d126")
 
 
@@ -49,3 +50,5 @@ app.include_router(tagging_outer , prefix="/api/v1")
 app.include_router(notifications_router , prefix="/api/v1")
 app.include_router(time_tracking_router , prefix="/api/v1")
 app.include_router(azure_router , prefix="/api/v1")
+app.include_router(label_router , prefix="/api/v1")
+app.include_router(task_watcher , prefix="/api/v1")

@@ -52,7 +52,6 @@ const MainLayout: React.FC = () => {
         {/* Scrollable middle content */}
         <Box sx={{ flexGrow: 1, overflow: 'auto', padding: '2rem' }}>
           <Outlet context={{ projects, onEdit: handleEdit, onDelete: handleDelete }} />
-          <NotificationList/>
         </Box>
       </Box>
     </Box>
