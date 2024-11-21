@@ -73,7 +73,7 @@ async def google_auth_callback(request: Request, db: Session = Depends(get_db)):
     # Check if the user exists
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        user = User(email=email, username=user_info.get("name"))
+        user = User(email=email, username=user_info.get("name"), hashed_password=None)
         db.add(user)
         db.commit()
 

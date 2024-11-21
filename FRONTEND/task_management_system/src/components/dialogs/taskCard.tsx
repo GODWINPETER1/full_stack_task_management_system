@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Card, CardContent, IconButton, Dialog, DialogContent, ButtonBase, Typography, Avatar, Box, Divider, TextField, List, ListItem, ListItemText
+  Card, CardContent, IconButton, Dialog, DialogContent, ButtonBase, Typography, Avatar, Box, Divider, TextField, List, ListItem, ListItemText, Button,
 } from '@mui/material';
 import CommentForm from '../comments/CommentForm';
 import CommentList from '../comments/CommentList';
@@ -39,16 +39,94 @@ interface TaskCardProps {
   onDelete: (id: number) => void;
 }
 
+interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user_id: number; // Add this field
+  username: string; // Add this field
+}
+
 const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openLabelDialog, setOpenLabelDialog] = useState(false);
   const [selectedLabels, setSelectedLabels] = useState<Label[]>([]);
   const [assignedUser, setAssignedUser] = useState<User[]>([]);
-  const [comments, setComments] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isWatching , setIsWatching] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [filteredAssignedUsers, setFilteredAssignedUsers] = useState<User[]>([]);
+  const [filteredTaggedUsers, setFilteredTaggedUsers] = useState<User[]>([]);
+  const [assignSearchTerm, setAssignSearchTerm] = useState('');
+  const [tagSearchTerm, setTagSearchTerm] = useState('');
+  const [isWatching, setIsWatching] = useState(false);
+  const [taggedUsers, setTaggedUsers] = useState<User[]>([]);
   const token = localStorage.getItem('accessToken');
+
+  // Fetch initially tagged users
+  useEffect(() => {
+    const fetchTaggedUsers = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/v1/tasks/${task.id}/tags`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setTaggedUsers(response.data);
+      } catch (error) {
+        console.error('Failed to fetch tagged users:', error);
+      }
+    };
+
+    fetchTaggedUsers();
+  }, [task.id, token]);
+
+
+  // Handle Tagging
+  const handleTagUser = async (userId: number) => {
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/v1/tasks/${task.id}/tag`,
+        { user_id: userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const taggedUser = response.data.user;
+      setTaggedUsers([...taggedUsers, taggedUser]);
+
+      setTagSearchTerm('');
+      setFilteredTaggedUsers([]);
+    } catch (error) {
+      console.error('Failed to tag user:', error);
+    }
+  };
+  
+
+  const searchUsers = async (query: string, setFilteredUsers: (users: User[]) => void) => {
+    if (!query) {
+      setFilteredUsers([]);
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/v1/users/search?query=${query}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setFilteredUsers(response.data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      searchUsers(assignSearchTerm, setFilteredAssignedUsers);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [assignSearchTerm]);
+
+
+
+
+
 
 
   
@@ -115,6 +193,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     setSelectedLabels(labels);
   };
 
+  const handleNewComment = (newComment : any) => {
+    setComments((prevComments) => [...prevComments, newComment]);
+  };
+  
+
   const fetchComments = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/v1/tasks/${task.id}/comments`, {
@@ -130,29 +213,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     fetchComments()
   } , [task.id])
 
-  useEffect(() => {
-    const searchUsers = async (query: string) => {
-      if (query.length > 0) {
-        try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/v1/users/?search=${query}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setFilteredUsers(response.data);
-        } catch (error) {
-          console.error('Error fetching users:', error);
-        }
-      } else {
-        setFilteredUsers([]);
-      }
-    };
+  
 
 
-    const delayDebounceFn = setTimeout(() => {
-      searchUsers(searchTerm);
-    }, 100);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, token]);
+    useEffect(() => {
+      const delayDebounceFn = setTimeout(() => {
+        searchUsers(tagSearchTerm, setFilteredTaggedUsers);
+      }, 300);
+  
+      return () => clearTimeout(delayDebounceFn);
+    }, [tagSearchTerm]);
 
   return (
     <>
@@ -215,14 +285,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
             <Typography variant="subtitle1" fontWeight="bold">Assign Users</Typography>
             <TextField
               label="Search Users"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={assignSearchTerm}
+              onChange={(e) => setAssignSearchTerm(e.target.value)}
               fullWidth
               margin="dense"
               placeholder="Invite by name or email"
             />
             <List>
-              {filteredUsers.map((user) => (
+              {filteredAssignedUsers.map((user) => (
                 <ButtonBase
                   key={user.id}
                   onClick={() => setAssignedUser([...assignedUser, user])}
@@ -271,9 +341,41 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
           {/* Comments Section */}
           <Box marginTop={2}>
             <Typography variant="subtitle1" fontWeight="bold">Comments</Typography>
-            <CommentForm taskId={task.id} onCommentAdded={() => setComments([...comments])} />
+            <CommentForm taskId={task.id} onCommentAdded={handleNewComment} />
             <CommentList comments={comments} />
           </Box>
+
+          <Box>
+    <Typography variant="h6">Tag Users</Typography>
+    <TextField
+        label="Search users"
+        variant="outlined"
+        value={tagSearchTerm}
+        onChange={(e) => setTagSearchTerm(e.target.value)}
+        fullWidth
+    />
+    <List>
+        {filteredTaggedUsers.map((user) => (
+            <ListItem key={user.id}  component="div" onClick={() => handleTagUser(user.id)}>
+                <Avatar>{user.username[0]}</Avatar>
+                <ListItemText primary={user.username} secondary={user.email} />
+            </ListItem>
+        ))}
+    </List>
+
+    {/* Render tagged users */}
+    <Typography variant="subtitle1">Tagged Users</Typography>
+    <List>
+        {taggedUsers.map((user) => (
+            <ListItem key={user.id}>
+                <Avatar>{user.username[0]}</Avatar>
+                <ListItemText primary={user.username} secondary={user.email} />
+            </ListItem>
+        ))}
+    </List>
+</Box>
+
+
         </DialogContent>
 <Box
   style={{
@@ -293,6 +395,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
     action: toggleWatching
   },
     { label: 'Labels', icon: <LabelIcon />, action: handleOpenLabelDialog },
+    { label: 'Members', icon: <LinkIcon /> },
     { label: 'Relations', icon: <LinkIcon /> },
     { label: 'Tags', icon: <TagIcon /> },
     { label: 'Attachments', icon: <AttachFileIcon /> },

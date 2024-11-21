@@ -12,6 +12,7 @@ class CommentCreate(CommentBase):
 class CommentRead(CommentBase):
     id: int
     user_id: int  # Add user_id field
+    username: str
     task_id: int  # Add task_id field
     created_at: datetime  # Use datetime type
     tagged_users: Optional[list[int]] = None

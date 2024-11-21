@@ -5,10 +5,9 @@ interface Comment {
   id: number;
   content: string;
   created_at: string;
-  user?: {
-    username: string;
-    avatar?: string; // URL to avatar image, optional
-  };
+  user_id: number;
+  username: string;
+  tagged_users?: number[];
 }
 
 interface CommentListProps {
@@ -20,9 +19,9 @@ const CommentList: React.FC<CommentListProps> = ({ comments }) => {
     <List>
       {comments.map((comment) => (
         <ListItem key={comment.id} alignItems="flex-start">
-          <Avatar alt={comment.user?.username || 'User'} src={comment.user?.avatar || ''} />
+          <Avatar alt={comment.username || 'User'} />
           <Box marginLeft={2}>
-            <Typography variant="body1">{comment.user?.username || 'Unknown User'}</Typography>
+            <Typography variant="body1">{comment.username || 'Unknown User'}</Typography>
             <Typography variant="body2" color="textSecondary">
               {new Date(comment.created_at).toLocaleString()}
             </Typography>

@@ -13,9 +13,9 @@ router = APIRouter()
 
 @router.post("/tasks/{task_id}/comments", response_model=CommentRead)
 async def create_comment(
-    task_id: int, 
-    comment: CommentCreate, 
-    db: Session = Depends(get_db), 
+    task_id: int,
+    comment: CommentCreate,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     # Check if the task exists
@@ -24,31 +24,45 @@ async def create_comment(
         raise HTTPException(status_code=404, detail="Task not found")
 
     # Create the comment
-    db_comment = Comment(content=comment.content, task_id=task_id, user_id=current_user.id , tagged_users = comment.tagged_users) 
+    db_comment = Comment(content=comment.content, task_id=task_id, user_id=current_user.id, tagged_users=comment.tagged_users)
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)  # Refresh the instance to get the new created_at value
 
-    # Return the comment with user_id, task_id, and created_at
+    # Return the comment with user_id, task_id, created_at, and username
     return {
         "id": db_comment.id,
         "content": db_comment.content,
-        "user_id": db_comment.user_id,  # Include user_id in the response
-        "task_id": db_comment.task_id,  # Include task_id in the response
-        "created_at": db_comment.created_at.isoformat()  # Convert to ISO string format
+        "user_id": db_comment.user_id,
+        "username": current_user.username,  # Include the username
+        "task_id": db_comment.task_id,
+        "created_at": db_comment.created_at,
+        "tagged_users": db_comment.tagged_users,
     }
+
 
 
 
 @router.get("/tasks/{task_id}/comments", response_model=List[CommentRead])
 def read_comments(task_id: int, db: Session = Depends(get_db)):
-    return db.query(Comment).filter(Comment.task_id == task_id).all()
+    # Join Comment and User to include username in the response
+    comments = (
+        db.query(Comment, User.username)
+        .join(User, Comment.user_id == User.id)
+        .filter(Comment.task_id == task_id)
+        .all()
+    )
 
-@router.delete("/comments/{comment_id}", response_model=CommentRead)
-def delete_comment(comment_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    comment = db.query(Comment).filter(Comment.id == comment_id, Comment.user_id == current_user.id).first()
-    if not comment:
-        raise HTTPException(status_code=404, detail="Comment not found")
-    db.delete(comment)
-    db.commit()
-    return comment
+    # Format the response to include username
+    return [
+        {
+            "id": comment.id,
+            "content": comment.content,
+            "user_id": comment.user_id,
+            "username": username,  # Include username from the joined table
+            "task_id": comment.task_id,
+            "created_at": comment.created_at,
+            "tagged_users": comment.tagged_users,
+        }
+        for comment, username in comments
+    ]

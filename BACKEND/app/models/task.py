@@ -37,20 +37,8 @@ class Task(Base):
     time_logs = relationship("TimeLog" , back_populates="task")
     labels = relationship("Label" , secondary= task_labels , back_populates="tasks")
     watchers = relationship("TaskWatcher" , back_populates="task")
-    # dependencies field 
-    dependencies = relationship("Task" , secondary="task_dependencies" , primaryjoin="Task.id == task_dependencies.c.task_id", secondaryjoin="Task.id == task_dependencies.c.dependent_task_id" , backref="dependent_tasks")
-
-task_dependencies = Table(
-    "task_dependencies",
-    Base.metadata,
-    Column("task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
-    Column("dependent_task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True)
-)
-
-Task.dependencies = relationship(
-    "Task",
-    secondary=task_dependencies,
-    primaryjoin=Task.id == task_dependencies.c.task_id,
-    secondaryjoin=Task.id == task_dependencies.c.dependent_task_id,
-    backref="dependent_tasks"
-)
+    
+    
+    # Dependencies relationships
+    dependencies = relationship("TaskDependency", back_populates="task", foreign_keys="[TaskDependency.task_id]")
+    dependent_tasks = relationship("TaskDependency", back_populates="dependent_task", foreign_keys="[TaskDependency.dependent_task_id]")

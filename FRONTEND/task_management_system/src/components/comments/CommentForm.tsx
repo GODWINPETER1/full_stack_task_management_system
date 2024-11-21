@@ -4,7 +4,7 @@ import axios from 'axios';
 
 interface CommentFormProps {
   taskId: number;
-  onCommentAdded: () => void; // Callback to refresh comments
+  onCommentAdded: (newComment: Comment) => void;
 }
 
 const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => {
@@ -13,19 +13,17 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!token) {
-      console.error('No access token found');
-      return;
-    }
+    if (!content.trim()) return; // Prevent empty comments
 
     try {
-      await axios.post(
+      const response = await axios.post(
         `http://127.0.0.1:8000/api/v1/tasks/${taskId}/comments`,
         { content },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setContent(''); // Clear the input field after submission
-      onCommentAdded(); // Trigger refresh of comments
+
+      onCommentAdded(response.data); // Notify parent with new comment
+      setContent(''); // Clear the input field
     } catch (error) {
       console.error('Failed to add comment:', error);
     }
@@ -48,3 +46,4 @@ const CommentForm: React.FC<CommentFormProps> = ({ taskId, onCommentAdded }) => 
 };
 
 export default CommentForm;
+

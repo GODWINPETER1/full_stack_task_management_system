@@ -40,19 +40,20 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/notifications', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setNotifications(response.data);
-        console.log(response.data)
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-      }
+        try {
+            const response = await axios.get(
+                "http://127.0.0.1:8000/api/v1/notifications",
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setNotifications(response.data);
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+        }
     };
 
     fetchNotifications();
-  }, [token]);
+}, [token]);
+
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -96,11 +97,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {/* Notification Icon with Badge */}
-          <IconButton color="inherit" sx={{ marginRight: 2 }} onClick={handleNotificationClick}>
-            <Badge badgeContent={notifications.length} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          <IconButton color="inherit" onClick={handleNotificationClick}>
+    <Badge badgeContent={notifications.length} color="error">
+        <NotificationsIcon />
+    </Badge>
+</IconButton>
+
 
           {/* Notification Dialog */}
           <Dialog open={notificationDialogOpen} onClose={handleNotificationClose} maxWidth="sm" fullWidth>
