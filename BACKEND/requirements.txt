@@ -2,7 +2,14 @@ aiomysql==0.1.1
 alembic==1.13.2
 annotated-types==0.7.0
 anyio==4.4.0
+<<<<<<< HEAD
+<<<<<<<< HEAD:BACKEND/requirements.txt
+========
+Authlib==1.3.2
+>>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0:BACKEND/requirement.txt
+=======
 Authlib==1.3.0
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0
 bcrypt==4.2.0
 certifi==2024.7.4
 cffi==1.17.1
@@ -30,7 +37,10 @@ Mako==1.3.5
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
+<<<<<<< HEAD
+=======
 msal==1.31.0
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0
 passlib==1.7.4
 psycopg2-binary==2.9.9
 pyasn1==0.6.0
@@ -58,4 +68,8 @@ typing_extensions==4.12.2
 urllib3==2.2.2
 uvicorn==0.21.1
 watchfiles==0.23.0
+<<<<<<< HEAD
 websockets==13.0
+=======
+websockets==13.0
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0

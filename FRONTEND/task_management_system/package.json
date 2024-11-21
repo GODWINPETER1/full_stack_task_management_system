@@ -7,7 +7,11 @@
     "@azure/msal-react": "^2.1.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+<<<<<<< HEAD
+    "@mui/icons-material": "^6.0.1",
+=======
     "@mui/icons-material": "^6.0.2",
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0
     "@mui/material": "^6.0.0",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.7",

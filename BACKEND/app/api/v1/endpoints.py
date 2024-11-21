@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 
 router = APIRouter()
 
+<<<<<<< HEAD
+=======
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -69,6 +71,7 @@ def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 
 
 # user registration 
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0
 @router.post("/register")
 async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     # Check if the email is already registered
@@ -83,10 +86,20 @@ async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     
     # Hash the password and create a new user
     hashed_password = get_password_hash(user_in.password)
+<<<<<<< HEAD
+    new_user = User(name=user_in.name, email=user_in.email, hashed_password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return new_user
+
+=======
     new_user = User(username=user_in.username, email=user_in.email, hashed_password=hashed_password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+>>>>>>> dee9bf867cfe32b89df46ab4cd68c64c3a7604d0
 
     # Assign a role based on email domain
     if "@admin.com" in user_in.email:
