@@ -17,6 +17,7 @@ from app.api.watcherRouter import router as task_watcher
 from app.auth.azure_auth import  azure_router
 from app.api.searchUser import router as searchRouter
 from app.api.task_dependencies import router as taskDependency
+from app.api.invitation import router as invitationRouter
 from starlette.middleware.sessions import SessionMiddleware
 
 
@@ -56,3 +57,4 @@ app.include_router(label_router , prefix="/api/v1")
 app.include_router(task_watcher , prefix="/api/v1")
 app.include_router(searchRouter , prefix="/api/v1")
 app.include_router(taskDependency , prefix="/api/v1")
+app.include_router(invitationRouter , prefix="/api/v1")

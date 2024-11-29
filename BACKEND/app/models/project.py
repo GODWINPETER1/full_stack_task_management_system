@@ -28,3 +28,4 @@ class Project(Base):
     
 
     tasks = relationship("Task", back_populates="project")
+    invitations = relationship("Invitation", back_populates="project")  # Add this line

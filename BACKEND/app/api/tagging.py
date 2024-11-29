@@ -6,7 +6,7 @@ from app.models.task import Task
 from app.schemas.tag import TagCreate  # Make sure this schema exists
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
-from app.utils import create_notification
+from app.utils.notification import create_notification
 
 router = APIRouter()
 
