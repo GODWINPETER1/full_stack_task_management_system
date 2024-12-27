@@ -23,6 +23,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggleButton from '../button/dark_Light';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -96,6 +97,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           Task Management System
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Dark/light mode toggle */}
+          <Tooltip title="Toggle Dark/Light Mode">
+              <IconButton>
+                   <ThemeToggleButton/>
+              </IconButton>
+          </Tooltip>
           {/* Notification Icon with Badge */}
           <IconButton color="inherit" onClick={handleNotificationClick}>
     <Badge badgeContent={notifications.length} color="error">

@@ -15,6 +15,7 @@ import TagIcon from '@mui/icons-material/Tag';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { TaskDependency } from '../../redux/taskSlice';
 
 
 
@@ -59,7 +60,63 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
   const [tagSearchTerm, setTagSearchTerm] = useState('');
   const [isWatching, setIsWatching] = useState(false);
   const [taggedUsers, setTaggedUsers] = useState<User[]>([]);
+  const [dependencies , setDependencies] = useState<TaskDependency[]>([]);
+
+
   const token = localStorage.getItem('accessToken');
+
+
+  useEffect(() => {
+    const fetchDependencies = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/v1/tasks/${task.id}/dependencies`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setDependencies(response.data);
+      } catch (error) {
+        console.error('Failed to fetch dependencies:', error);
+      }
+    };
+  
+    fetchDependencies();
+  }, [task.id, token]);
+
+  const handleRemoveDependency = async (dependencyId: number) => {
+    try {
+      await axios.delete(
+        `http://127.0.0.1:8000/api/v1/tasks/dependencies/${dependencyId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      setDependencies((prev) =>
+        prev.filter((dependency) => dependency.id !== dependencyId)
+      );
+    } catch (error) {
+      console.error('Failed to remove dependency:', error);
+    }
+  };
+
+  const [newDependencyId, setNewDependencyId] = useState<number | null>(null);
+
+const handleAddDependency = async () => {
+  if (!newDependencyId) return;
+
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:8000/api/v1/tasks/${task.id}/dependencies`,
+      { dependent_task_id: newDependencyId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setDependencies((prev) => [...prev, response.data]);
+    setNewDependencyId(null);
+  } catch (error) {
+    console.error('Failed to add dependency:', error);
+  }
+};
+
+  
 
   // Fetch initially tagged users
   useEffect(() => {
@@ -374,6 +431,39 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onDelete }) => {
         ))}
     </List>
 </Box>
+
+<Box>
+  <TextField
+    label="Dependent Task ID"
+    value={newDependencyId || ''}
+    onChange={(e) => setNewDependencyId(Number(e.target.value))}
+    type="number"
+  />
+  <Button onClick={handleAddDependency} variant="contained" color="primary">
+    Add Dependency
+  </Button>
+</Box>
+
+
+<Box>
+  <Typography variant="subtitle1">Dependencies</Typography>
+  <List>
+    {dependencies.map((dependency) => (
+      <ListItem key={dependency.id}>
+        <ListItemText
+          primary={`Task ID: ${dependency.dependent_task_id}`}
+        />
+        <Button
+          color="secondary"
+          onClick={() => handleRemoveDependency(dependency.id)}
+        >
+          Remove
+        </Button>
+      </ListItem>
+    ))}
+  </List>
+</Box>
+
 
 
         </DialogContent>

@@ -156,6 +156,48 @@ button {
     color: rgb(138, 148, 153);
 }
 
+/* activityPanel */
+
+.activity-log-panel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.activity-log-panel h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.activity-log-entry {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.activity-log-entry:last-child {
+  border-bottom: none;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.activity-header strong {
+  color: #0073e6;
+}
+
+.activity-header span {
+  color: #666;
+  font-size: 12px;
+}
+
+
 
 
 

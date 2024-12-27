@@ -32,6 +32,8 @@ import ProjectForm from '../../components/project/ProjectForm';
 import { useAuth } from '../../context/AuthContext';
 import {RootState} from '../../redux/store'
 import { useTheme } from '@emotion/react';
+import { useParams } from 'react-router-dom';
+import InvitationDialog from '../../components/invitation/Invitation';
 
 interface Project {
   id: string;
@@ -49,13 +51,17 @@ const DashboardPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState('asc'); // Add sort direction state
   const [openDialog, setOpenDialog] = useState(false);
   const [showDeletedProjectsDialog , setShowDeletedProjectsDialog] = useState(false)
-  
+  const [dialogOpen , setDialogOpen] = useState(false)
+  const { projectId } = useParams<{ projectId: string }>();
 
   const project = useSelector((state: RootState) => state.projects.projects)
   const deletedProjects = useSelector((state: RootState) => state.projects.deletedProjects)
   const dispatch = useDispatch();
 
   const navigate = useNavigate()
+
+  const openDialogInvite = () => setDialogOpen(true);
+  const closeDialog = () => setDialogOpen(false);
   
 
 
@@ -137,6 +143,8 @@ const DashboardPage: React.FC = () => {
     <>
       {/* Create Project Button Section */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+  
+
         <Button startIcon={<Add />} onClick={() => setOpenDialog(true)}
           style={{
             background: 'linear-gradient(0deg, #f6f7ff 23.96%, #fff 60.42%)',
@@ -302,7 +310,6 @@ const DashboardPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
     
     </>
   );

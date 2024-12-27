@@ -11,12 +11,14 @@ import TaskCalendar from './pages/Agenda/Agenda';
 import ReportsPage from './pages/Reports/Reports';
 import Overview from './pages/Overview/overview';
 import ProjectPage from './pages/Projects/ProjectPage';
+import { ThemeProviderWrapper } from './context/ThemeContext';
 
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        
         <Route path="/" element={<RegisterPage />} />
         <Route path="/signin" element={<LoginPage />} />
         <Route path="/dashboard/*" element={<MainLayout />}>

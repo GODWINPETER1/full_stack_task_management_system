@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { RootState, AppDispatch } from '../../redux/store';
 import { addTask } from '../../redux/taskSlice';
-import { Modal, TextField, Button, FormControl, InputLabel, Select, MenuItem, Typography, Box, Paper } from '@mui/material';
+import { Modal, TextField, Button, FormControl, InputLabel, Select, MenuItem, Typography, Box, Paper, Tooltip } from '@mui/material';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
@@ -26,6 +26,7 @@ interface Event {
   start: Date;
   end: Date;
   allDay?: boolean;
+  priority?: string;
 }
 
 const TaskCalendar: React.FC = () => {
@@ -41,6 +42,7 @@ const TaskCalendar: React.FC = () => {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState<string | null>(null);
   const [newTaskPriority, setNewTaskPriority] = useState('Medium');
+  const [assignedUser, setAssignedUser] = useState<number | null>(null); // Add user assignment
 
   useEffect(() => {
     if (!projectId) {
@@ -54,9 +56,10 @@ const TaskCalendar: React.FC = () => {
       start: new Date(task.due_date || new Date()),
       end: new Date(task.due_date || new Date()),
       allDay: true,
+      priority: task.priority,
     }));
     setEvents(taskEvents);
-  }, [tasks, projectId]); // `useEffect` is called unconditionally
+  }, [tasks, projectId]);
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
@@ -72,6 +75,7 @@ const TaskCalendar: React.FC = () => {
         status: 'To Do',
         due_date: newTaskDueDate || null,
         priority: newTaskPriority,
+        user_id: assignedUser, // Assign user to task
       };
 
       try {
@@ -90,6 +94,7 @@ const TaskCalendar: React.FC = () => {
       setNewTaskDescription('');
       setNewTaskDueDate(null);
       setNewTaskPriority('Medium');
+      setAssignedUser(null);
       setModalOpen(false);
     }
   };
@@ -108,6 +113,19 @@ const TaskCalendar: React.FC = () => {
           style={{ height: 500 }}
           onSelectSlot={(slotInfo) => handleDateClick(slotInfo.start)}
           selectable
+          eventPropGetter={(event) => ({
+            style: {
+              backgroundColor: event.priority === 'High' ? 'red' : event.priority === 'Medium' ? 'orange' : 'green',
+              color: 'white',
+            },
+          })}
+          components={{
+            event: ({ event }) => (
+              <Tooltip title={event.title} placement="top">
+                <div style={{ padding: '5px' }}>{event.title}</div>
+              </Tooltip>
+            ),
+          }}
         />
       </Paper>
 
@@ -132,6 +150,7 @@ const TaskCalendar: React.FC = () => {
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             margin="dense"
+            required
           />
           <TextField
             label="Task Description"
@@ -164,6 +183,19 @@ const TaskCalendar: React.FC = () => {
               <MenuItem value="Critical">Critical</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            label="Assign to User"
+            fullWidth
+            select
+            value={assignedUser || ''}
+            onChange={(e) => setAssignedUser(Number(e.target.value))}
+            margin="dense"
+          >
+            {/* Dynamically populate users */}
+            <MenuItem value={1}>User 1</MenuItem>
+            <MenuItem value={2}>User 2</MenuItem>
+            <MenuItem value={3}>User 3</MenuItem>
+          </TextField>
           <Button
             variant="contained"
             color="primary"

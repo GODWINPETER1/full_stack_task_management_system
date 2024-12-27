@@ -11,6 +11,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import DoneIcon from '@mui/icons-material/Done';
 import InfoIcon from '@mui/icons-material/Info';  // Importing Info icon for empty columns
+import InvitationDialog from '../../components/invitation/Invitation';
 
 interface Task {
   id: number;
@@ -32,8 +33,14 @@ const ProjectPage: React.FC = () => {
   const [newTaskDueDate, setNewTaskDueDate] = useState<string | null>(null);
   const [open, setOpen] = useState(false);  // Dialog open/close state
   const [newTaskPriority, setNewTaskPriority] = useState('Medium'); // Add state for priority
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const token = localStorage.getItem('accessToken')
+  const openDialog = () => setDialogOpen(true);
+  const closeDialog = () => setDialogOpen(false);
+
+ 
+
   
 
   useEffect(() => {
@@ -211,12 +218,33 @@ const ProjectPage: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Project {projectId}</h2>
-        <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        {/* Left: Invite Member Button */}
+        <Button variant="outlined" color="primary" onClick={openDialog}>
+          Invite Member
+        </Button>
+
+        {/* Right: Create Task Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpen(true)}
+          style={{
+            backgroundColor: '#1976d2',
+            color: '#fff',
+          }}
+        >
           Create Task
         </Button>
       </div>
+
 
       {/* Dialog for task creation */}
       <Dialog open={open} onClose={() => setOpen(false)}>
@@ -264,6 +292,9 @@ const ProjectPage: React.FC = () => {
           <Button onClick={handleCreateTask} color="primary">Create</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Invitation Dialog */}
+      <InvitationDialog open={dialogOpen} onClose={closeDialog} projectId={projectId} />
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="board" style={{ display: 'flex', justifyContent: 'space-between' }}>

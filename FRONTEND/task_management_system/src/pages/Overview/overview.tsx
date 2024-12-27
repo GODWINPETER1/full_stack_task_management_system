@@ -3,19 +3,20 @@ import { Typography, Card, CardContent, Grid, Box, LinearProgress, Divider } fro
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { getProjectAnalytics, getTaskAnalytics } from '../../utils/analytics';
+import ActivityLogPanel from '../../components/activityLog/ActivityLog'; // Import ActivityLogPanel
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const Overview: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
   const [greeting, setGreeting] = useState('');
-  const { username, userId , user } = useAuth();
+  const { username, userId, user } = useAuth();
   const [projectAnalytics, setProjectAnalytics] = useState<{
     total_projects: number;
     active_projects: number;
     completed_projects: number;
   } | null>(null);
-  
+
   const [taskAnalytics, setTaskAnalytics] = useState<{
     total_tasks: number;
     completed_tasks: number;
@@ -57,16 +58,20 @@ const Overview: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const taskDistribution = taskAnalytics ? [
-    { name: 'Completed', value: taskAnalytics.completed_tasks },
-    { name: 'Pending', value: taskAnalytics.pending_tasks }
-  ] : [];
+  const taskDistribution = taskAnalytics
+    ? [
+        { name: 'Completed', value: taskAnalytics.completed_tasks },
+        { name: 'Pending', value: taskAnalytics.pending_tasks },
+      ]
+    : [];
 
-  const projectData = projectAnalytics ? [
-    { name: 'Total Projects', value: projectAnalytics.total_projects },
-    { name: 'Active Projects', value: projectAnalytics.active_projects },
-    { name: 'Completed Projects', value: projectAnalytics.completed_projects }
-  ] : [];
+  const projectData = projectAnalytics
+    ? [
+        { name: 'Total Projects', value: projectAnalytics.total_projects },
+        { name: 'Active Projects', value: projectAnalytics.active_projects },
+        { name: 'Completed Projects', value: projectAnalytics.completed_projects },
+      ]
+    : [];
 
   return (
     <Box
@@ -78,24 +83,32 @@ const Overview: React.FC = () => {
         maxHeight: '100vh',
         overflow: 'hidden',
         padding: 4,
-        backgroundColor: '#f6f7ff',  // Light background for contrast
+        backgroundColor: '#f6f7ff',
       }}
     >
       <Box sx={{ paddingBottom: 2 }}>
         {/* Greeting Section */}
-        <Typography variant="h4" gutterBottom>{greeting}, {user?.name || username}!</Typography>
-        <Typography variant="h3" color="primary">{currentTime}</Typography>
-        <Typography variant="body1" sx={{ marginTop: 1 }}>Here's an overview of your tasks and projects for today.</Typography>
+        <Typography variant="h4" gutterBottom>
+          {greeting}, {user?.name || username}!
+        </Typography>
+        <Typography variant="h3" color="primary">
+          {currentTime}
+        </Typography>
+        <Typography variant="body1" sx={{ marginTop: 1 }}>
+          Here's an overview of your tasks and projects for today.
+        </Typography>
         <Divider sx={{ marginTop: 2, marginBottom: 3 }} />
       </Box>
 
       <Box sx={{ flex: 1, overflowY: 'auto', paddingRight: 2 }}>
         <Grid container spacing={4}>
           {/* Projects Overview */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} lg={4}>
             <Card sx={{ boxShadow: 2, borderRadius: 4 }}>
               <CardContent>
-                <Typography variant="h5" gutterBottom>Projects Overview</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Projects Overview
+                </Typography>
                 {projectAnalytics ? (
                   <>
                     <Typography>Total Projects: {projectAnalytics.total_projects}</Typography>
@@ -110,19 +123,21 @@ const Overview: React.FC = () => {
                     </ResponsiveContainer>
                   </>
                 ) : (
-                  <Typography variant="body2" color="textSecondary">Loading project analytics...</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Loading project analytics...
+                  </Typography>
                 )}
-
-                
               </CardContent>
             </Card>
           </Grid>
 
           {/* Task Analytics */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} lg={4}>
             <Card sx={{ boxShadow: 2, borderRadius: 4 }}>
               <CardContent>
-                <Typography variant="h5" gutterBottom>Task Analytics</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Task Analytics
+                </Typography>
                 {taskAnalytics ? (
                   <>
                     <Typography>Total Tasks: {taskAnalytics.total_tasks}</Typography>
@@ -154,10 +169,17 @@ const Overview: React.FC = () => {
                     />
                   </>
                 ) : (
-                  <Typography variant="body2" color="textSecondary">Loading task analytics...</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Loading task analytics...
+                  </Typography>
                 )}
               </CardContent>
             </Card>
+          </Grid>
+
+          {/* Activity Log */}
+          <Grid item xs={12} lg={4}>
+            <ActivityLogPanel />
           </Grid>
         </Grid>
       </Box>
